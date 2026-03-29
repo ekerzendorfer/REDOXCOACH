@@ -235,4 +235,78 @@
 
             // UI umbauen
             document.getElementById('equation-workspace').innerHTML = boardHTML;
-            document.getElementById
+            document.getElementById('lobby').style.display = 'none';
+            document.getElementById('equation-workspace').style.display = 'block';
+
+            // Validierung für die neu generierten Felder anhängen
+            setupValidationLogic();
+        }
+
+        // 4. Die Kontroll-Logik (Validierung)
+        function setupValidationLogic() {
+            const board = document.getElementById('board');
+            const title = document.getElementById('main-title');
+            const inst = document.getElementById('instruction-text');
+
+            function checkAll(selector) { return Array.from(document.querySelectorAll(selector)).every(el => el.classList.contains('correct')); }
+            
+            function bindInputs(selector, nextPhaseFunc) {
+                document.querySelectorAll(selector).forEach(el => {
+                    el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', function() {
+                        this.classList.remove('correct', 'incorrect');
+                        let val = this.value.trim();
+                        if(val !== '' && val !== '+' && val !== '-') {
+                            if (val === this.dataset.correct) this.classList.add('correct');
+                            else this.classList.add('incorrect');
+                            nextPhaseFunc();
+                        }
+                    });
+                });
+            }
+
+            // Phase 1 -> 2
+            bindInputs('.oz-input[data-correct]', () => {
+                if(checkAll('.oz-input[data-correct]')) {
+                    inst.style.opacity = 0;
+                    setTimeout(() => {
+                        title.innerText = "Phase 2: Redoxpaare";
+                        inst.innerHTML = "Ordne die Rollen (Ox1/Red1 und Red2/Ox2) zu.";
+                        inst.style.opacity = 1; board.classList.add('show-phase2');
+                    }, 300);
+                }
+            });
+
+            // Phase 2 -> 3
+            bindInputs('.role-select[data-correct]', () => {
+                if(checkAll('.role-select[data-correct]')) {
+                    inst.style.opacity = 0;
+                    setTimeout(() => {
+                        title.innerText = "Phase 3: Elektronenübergang";
+                        inst.innerHTML = "Wie viele Elektronen (e⁻) werden insgesamt pro Teilchen aufgenommen bzw. abgegeben?";
+                        inst.style.opacity = 1; board.classList.add('show-phase3');
+                    }, 300);
+                }
+            });
+
+            // Phase 3 -> 4
+            bindInputs('.e-input[data-correct]', () => {
+                if(checkAll('.e-input[data-correct]')) {
+                    inst.style.opacity = 0;
+                    setTimeout(() => {
+                        title.innerText = "Phase 4: Die Multiplikatoren";
+                        inst.innerHTML = "Ermittle das kleinste gemeinsame Vielfache (kgV) der Elektronen.";
+                        inst.style.opacity = 1; board.classList.add('show-phase4');
+                    }, 300);
+                }
+            });
+
+            // Phase 4 -> Sieg!
+            bindInputs('.m-input[data-correct]', () => {
+                if(checkAll('.m-input[data-correct]')) {
+                    document.getElementById('success-message').style.display = 'block';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
