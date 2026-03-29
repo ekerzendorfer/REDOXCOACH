@@ -33,8 +33,9 @@
         .term-col { display: flex; flex-direction: column; align-items: center; gap: 12px; }
         .molecule { display: flex; gap: 2px; }
         .atom-group { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
-        .symbol, .operator { font-family: "Times New Roman", Times, serif; font-size: 32px; line-height: 1; display: inline-flex; align-items: baseline; }
+        .symbol, .operator, .coefficient { font-family: "Times New Roman", Times, serif; font-size: 32px; line-height: 1; display: inline-flex; align-items: baseline; }
         .operator { margin: 0 5px; font-family: sans-serif; font-weight: bold; color: #334e68; }
+        .coefficient { margin-right: 5px; font-weight: bold; color: #3b82f6; } /* Blauer Hilfskoeffizient */
         .symbol sub, .symbol sup { font-size: 0.6em; line-height: 0; position: relative; vertical-align: baseline; }
         .symbol sub { bottom: -0.25em; } .symbol sup { top: -0.5em; }     
 
@@ -94,42 +95,27 @@
     <footer>Erstellt von Erich Kerzendorfer mit Hilfe von Gemini 3</footer>
 
     <script>
-        // Log für die Konsole, damit wir sehen, dass das JS nicht abgestürzt ist!
-        console.log("REDOX-COACH Skript wurde erfolgreich gestartet.");
-
         let redoxDB = [];
 
-        // 1. Datenbank laden (Robust und fehlertolerant)
+        // 1. Datenbank laden
         document.addEventListener('DOMContentLoaded', () => {
             fetch('./redox_db.json')
                 .then(response => {
                     if(!response.ok) throw new Error("HTTP " + response.status);
                     return response.json();
                 })
-                .then(data => { 
-                    redoxDB = data; 
-                    console.log("Datenbank erfolgreich geladen. Anzahl Gleichungen:", data.length); 
-                })
-                .catch(err => {
-                    console.error("DB Ladefehler:", err);
-                    alert("Achtung: Die Datei redox_db.json konnte nicht geladen werden.\nLösung: Hast du sie auf GitHub hochgeladen und Strg+F5 gedrückt?");
-                });
+                .then(data => { redoxDB = data; })
+                .catch(err => alert("Datenbank nicht gefunden. Läuft die Seite auf GitHub Pages?"));
         });
 
         // 2. Start-Button Logik
         document.getElementById('btn-start').addEventListener('click', () => {
-            if(redoxDB.length === 0) { 
-                alert("Die Datenbank wird noch geladen oder es gab einen Fehler. Bitte warte einen Moment oder drücke F5."); 
-                return; 
-            }
+            if(redoxDB.length === 0) { alert("Datenbank lädt noch..."); return; }
             
             const diff = document.getElementById('difficulty').value;
             let filtered = diff === 'all' ? redoxDB : redoxDB.filter(eq => eq.difficulty === diff);
             
-            if(filtered.length === 0) { 
-                alert("Keine Gleichung für dieses Level in der Datenbank gefunden."); 
-                return; 
-            }
+            if(filtered.length === 0) { alert("Keine Gleichung für dieses Level gefunden."); return; }
             
             const randomEq = filtered[Math.floor(Math.random() * filtered.length)];
             generateBoard(randomEq);
@@ -137,12 +123,47 @@
 
         // 3. Der HTML-Generator!
         function generateBoard(eq) {
+            // Reaktanden zuweisen (r1 ist immer Ox-Mittel, r2 immer Red-Mittel)
             const r1 = eq.equation.reactants[0];
             const r2 = eq.equation.reactants[1];
-            const p1 = eq.equation.products[0];
-            const p2 = eq.equation.products[1];
 
-            // Hilfsfunktion: Formatiert die Ladung
+            // Hilfsfunktion: Finde das Kernatom (nicht O, nicht H)
+            function getCoreAtom(mol) {
+                return mol.atoms.find(a => a.symbol !== 'O' && a.symbol !== 'H') || mol.atoms.find(a => a.symbol === 'O') || mol.atoms[0];
+            }
+
+            const symR1 = getCoreAtom(r1).symbol;
+            const symR2 = getCoreAtom(r2).symbol;
+
+            // Produkte DYNAMISCH zuordnen, damit sie immer exakt gegenüber dem passenden Edukt stehen!
+            let p1, p2;
+            if (getCoreAtom(eq.equation.products[0]).symbol === symR1) {
+                p1 = eq.equation.products[0];
+                p2 = eq.equation.products[1];
+            } else {
+                p1 = eq.equation.products[1];
+                p2 = eq.equation.products[0];
+            }
+
+            // Hilfskoeffizienten (Die blauen Zahlen) berechnen!
+            function calcAuxCoeff(molR, molP) {
+                let coreR = getCoreAtom(molR);
+                let coreP = getCoreAtom(molP);
+                let coeffR = 1, coeffP = 1;
+                if(coreR.symbol === coreP.symbol) {
+                    if(coreR.count < coreP.count) coeffR = Math.round(coreP.count / coreR.count);
+                    if(coreR.count > coreP.count) coeffP = Math.round(coreR.count / coreP.count);
+                }
+                return { r: coeffR, p: coeffP };
+            }
+
+            const aux1 = calcAuxCoeff(r1, p1);
+            const aux2 = calcAuxCoeff(r2, p2);
+
+            // Korrekte Basis-Elektronen pro Halbreaktion berechnen (Gesamt / Faktor)
+            const base_e_red = Math.round(eq.electrons.red_half_e / eq.factors.red_factor);
+            const base_e_ox = Math.round(eq.electrons.ox_half_e / eq.factors.ox_factor);
+
             function formatCharge(c) {
                 if(!c || c==="0" || c===0) return "";
                 let s = c.toString();
@@ -153,11 +174,16 @@
                 return s;
             }
 
-            // Hilfsfunktion: Baut ein Molekül als HTML-Block zusammen
-            function buildMolecule(mol) {
+            // Baut ein Molekül inkl. blauem Hilfskoeffizienten
+            function buildMolecule(mol, auxCoeff) {
                 let html = '<div class="molecule">';
-                let supStr = formatCharge(mol.charge);
                 
+                // Fügt die blaue Zahl ein, wenn nötig!
+                if(auxCoeff > 1) {
+                    html += `<div class="atom-group hide-on-phase5"><input type="text" class="oz-input hidden-placeholder"><span class="coefficient">${auxCoeff}</span></div>`;
+                }
+
+                let supStr = formatCharge(mol.charge);
                 mol.atoms.forEach((atom, idx) => {
                     let isLast = idx === mol.atoms.length - 1;
                     let subStr = atom.count > 1 ? `<sub>${atom.count}</sub>` : '';
@@ -181,33 +207,33 @@
 
                 <div class="equation-row">
                     <div class="term-col">
-                        ${buildMolecule(r1)}
+                        ${buildMolecule(r1, aux1.r)}
                         <select class="role-select" data-correct="ox1"><option value="">-- Rolle wählen --</option><option value="ox1">Ox1 (nimmt e⁻)</option><option value="red2">Red2 (gibt e⁻)</option></select>
-                        <div class="e-container"><input type="text" class="e-input" data-correct="${eq.electrons.red_half_e}" maxlength="2"> e⁻</div>
+                        <div class="e-container"><input type="text" class="e-input" data-correct="${base_e_red}" maxlength="2"> e⁻</div>
                     </div>
 
                     <div class="term-col"><div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="operator">+</span></div><select class="role-select hidden-placeholder"></select><div class="e-container hidden-placeholder"><input type="text" class="e-input"></div></div>
 
                     <div class="term-col">
-                        ${buildMolecule(r2)}
+                        ${buildMolecule(r2, aux2.r)}
                         <select class="role-select" data-correct="red2"><option value="">-- Rolle wählen --</option><option value="ox1">Ox1 (nimmt e⁻)</option><option value="red2">Red2 (gibt e⁻)</option></select>
-                        <div class="e-container"><input type="text" class="e-input" data-correct="${eq.electrons.ox_half_e}" maxlength="2"> e⁻</div>
+                        <div class="e-container"><input type="text" class="e-input" data-correct="${base_e_ox}" maxlength="2"> e⁻</div>
                     </div>
 
                     <div class="term-col"><div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="operator">&rarr;</span></div><select class="role-select hidden-placeholder"></select><div class="e-container hidden-placeholder"><input type="text" class="e-input"></div></div>
 
                     <div class="term-col">
-                        ${buildMolecule(p1)}
+                        ${buildMolecule(p1, aux1.p)}
                         <select class="role-select" data-correct="red1"><option value="">-- Rolle wählen --</option><option value="red1">Red1 (reduziert)</option><option value="ox2">Ox2 (oxidiert)</option></select>
-                        <div class="e-container"><input type="text" class="e-input" data-correct="${eq.electrons.red_half_e}" maxlength="2"> e⁻</div>
+                        <div class="e-container"><input type="text" class="e-input" data-correct="${base_e_red}" maxlength="2"> e⁻</div>
                     </div>
 
                     <div class="term-col"><div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="operator">+</span></div><select class="role-select hidden-placeholder"></select><div class="e-container hidden-placeholder"><input type="text" class="e-input"></div></div>
 
                     <div class="term-col">
-                        ${buildMolecule(p2)}
+                        ${buildMolecule(p2, aux2.p)}
                         <select class="role-select" data-correct="ox2"><option value="">-- Rolle wählen --</option><option value="red1">Red1 (reduziert)</option><option value="ox2">Ox2 (oxidiert)</option></select>
-                        <div class="e-container"><input type="text" class="e-input" data-correct="${eq.electrons.ox_half_e}" maxlength="2"> e⁻</div>
+                        <div class="e-container"><input type="text" class="e-input" data-correct="${base_e_ox}" maxlength="2"> e⁻</div>
                     </div>
                 </div>
 
@@ -216,29 +242,26 @@
                     <h2 style="font-size: 24px;">Phase 4: Elektronenbilanz</h2>
                     <div class="balance-board">
                         <div class="balance-row">
-                            <div class="balance-label"><span class="badge red">Reduktion</span>(Ox1 &rarr; Red1) nimmt <span class="e-count" style="margin-left:5px;">${eq.electrons.red_half_e} e⁻</span> auf</div>
+                            <div class="balance-label"><span class="badge red">Reduktion</span>(Ox1 &rarr; Red1) nimmt <span class="e-count" style="margin-left:5px;">${base_e_red} e⁻</span> auf</div>
                             <div class="multiplier-group">&times; <input type="text" class="m-input" data-correct="${eq.factors.red_factor}" maxlength="2"></div>
                         </div>
                         <div class="balance-row">
-                            <div class="balance-label"><span class="badge ox">Oxidation</span>(Red2 &rarr; Ox2) gibt <span class="e-count" style="margin-left:5px;">${eq.electrons.ox_half_e} e⁻</span> ab</div>
+                            <div class="balance-label"><span class="badge ox">Oxidation</span>(Red2 &rarr; Ox2) gibt <span class="e-count" style="margin-left:5px;">${base_e_ox} e⁻</span> ab</div>
                             <div class="multiplier-group">&times; <input type="text" class="m-input" data-correct="${eq.factors.ox_factor}" maxlength="2"></div>
                         </div>
                     </div>
                 </div>
                 
                 <div id="success-message" style="display:none; margin-top: 30px; padding: 20px; background: #d1fae5; color: #065f46; border-radius: 8px; font-weight: bold; font-size: 1.2em; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                    🏆 Meisterhaft! Du hast das kgV gefunden.<br>
+                    🏆 Meisterhaft! Du hast das kgV (${eq.electrons.ox_half_e} e⁻) gefunden.<br>
                     <span style="font-size: 0.85em; font-weight: normal;">Notiere dir nun die Faktoren auf einem Zettel und gleiche die H⁺ und H₂O Moleküle aus!</span><br>
                     <button onclick="location.reload()" style="margin-top: 15px; padding: 10px 20px; cursor: pointer; border-radius: 6px; border: none; background: #059669; color: white; font-weight: bold; font-size:16px; transition: 0.2s;">Nächste Gleichung lösen</button>
                 </div>
             </div>`;
 
-            // UI umbauen
             document.getElementById('equation-workspace').innerHTML = boardHTML;
             document.getElementById('lobby').style.display = 'none';
             document.getElementById('equation-workspace').style.display = 'block';
-
-            // Validierung für die neu generierten Felder anhängen
             setupValidationLogic();
         }
 
