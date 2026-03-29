@@ -3,417 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>REDOX - COACH</title>
+    <title>REDOX-COACH | Editor</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f4f8; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; color: #334e68; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; color: #334e68; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { color: #0f172a; margin-bottom: 5px; }
+        .editor-container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 800px; }
         
-        /* --- HEADER & LOBBY --- */
-        .app-header { text-align: center; margin-bottom: 30px; margin-top: 20px; }
-        .app-header h1 { font-size: 2.8em; color: #102a43; margin: 0; letter-spacing: 2px; }
-        .app-header p { color: #627d98; font-size: 1.2em; margin-top: 5px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        label { font-weight: 600; font-size: 14px; color: #475569; }
+        input, select { padding: 10px; border: 2px solid #cbd5e1; border-radius: 6px; font-size: 16px; outline: none; }
+        input:focus, select:focus { border-color: #3b82f6; }
+        
+        h3 { grid-column: 1 / -1; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin-top: 10px; color: #1e293b; }
+        
+        .btn-generate { grid-column: 1 / -1; background-color: #10b981; color: white; padding: 15px; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn-generate:hover { background-color: #059669; }
+        .btn-back { background-color: transparent; border: 2px solid #94a3b8; color: #64748b; padding: 10px 20px; border-radius: 8px; cursor: pointer; text-decoration: none; font-weight: bold; margin-bottom: 20px; }
+        .btn-back:hover { background-color: #f1f5f9; color: #334e68; }
 
-        .lobby-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 500px; margin-bottom: 30px; }
-        .control-group { margin-bottom: 25px; text-align: left; }
-        .control-group label { display: block; font-weight: 600; margin-bottom: 8px; color: #486581; }
-        select { width: 100%; padding: 12px; font-size: 16px; border: 2px solid #cbd5e1; border-radius: 8px; background-color: #f8fafc; color: #334e68; outline: none; cursor: pointer; }
-        select:focus { border-color: #3b82f6; }
-
-        .btn-start { background-color: #3b82f6; color: white; border: none; padding: 15px 30px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; transition: 0.3s; }
-        .btn-start:hover { background-color: #2563eb; }
-        .btn-editor { background-color: transparent; color: #627d98; border: 2px dashed #cbd5e1; padding: 10px 20px; font-size: 14px; font-weight: 600; border-radius: 8px; cursor: pointer; margin-top: 15px; width: 100%; transition: 0.3s; }
-        .btn-editor:hover { border-color: #94a3b8; color: #334e68; background-color: #f1f5f9; }
-
-        /* --- GLEICHUNGS-BOARD --- */
-        #equation-workspace { display: none; width: 100%; }
-        .equation-board { background: white; padding: 40px 60px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: max-content; max-width: 95vw; margin: 0 auto; transition: all 0.5s ease; }
-        .instruction { color: #627d98; margin-bottom: 40px; font-size: 1.1em; transition: opacity 0.3s; min-height: 50px; }
-        hr { border: 0; height: 1px; background-color: #e2e8f0; margin: 40px 0; }
-
-        .equation-row { display: flex; align-items: flex-end; justify-content: center; gap: 6px; flex-wrap: wrap; }
-        .term-col { display: flex; flex-direction: column; align-items: center; gap: 12px; }
-        .molecule { display: flex; gap: 2px; }
-        .atom-group { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
-        .symbol, .operator, .coefficient { font-family: "Times New Roman", Times, serif; font-size: 32px; line-height: 1; display: inline-flex; align-items: baseline; }
-        .operator { margin: 0 5px; font-family: sans-serif; font-weight: bold; color: #334e68; }
-        .coefficient { margin-right: 5px; font-weight: bold; color: #3b82f6; } 
-        .symbol sub, .symbol sup { font-size: 0.6em; line-height: 0; position: relative; vertical-align: baseline; }
-        .symbol sub { bottom: -0.25em; } .symbol sup { top: -0.5em; }     
-
-        /* --- EINGABEFELDER & FARBEN --- */
-        .oz-input { width: 36px; height: 28px; text-align: center; font-size: 18px; font-weight: bold; border: 2px solid #cbd5e1; border-radius: 6px; margin-bottom: 8px; outline: none; transition: all 0.3s ease; color: #334e68; }
-        .coef-input { width: 46px; height: 34px; text-align: center; font-size: 22px; font-weight: bold; border: 2px solid #94a3b8; border-radius: 6px; margin-right: 4px; outline: none; transition: all 0.3s ease; color: #0f172a; background-color: #f8fafc; font-family: "Times New Roman", Times, serif; }
-        .charge-input { width: 46px; height: 34px; text-align: center; font-size: 20px; font-weight: bold; border: 2px solid #94a3b8; border-radius: 6px; outline: none; transition: all 0.3s ease; color: #0f172a; background-color: #f8fafc; }
-
-        .oz-input.correct, .e-input.correct, .m-input.correct, .role-select.correct, .coef-input.correct, .charge-input.correct { border-color: #10b981 !important; background-color: #d1fae5 !important; color: #047857 !important; pointer-events: none; }
-        .oz-input.incorrect, .e-input.incorrect, .m-input.incorrect, .role-select.incorrect, .coef-input.incorrect, .charge-input.incorrect { border-color: #ef4444 !important; background-color: #fee2e2 !important; color: #b91c1c !important; }
-        .hidden-placeholder { visibility: hidden; pointer-events: none; }
-        .oz-input:focus, .role-select:focus, .e-input:focus, .m-input:focus, .coef-input:focus, .charge-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
-
-        /* --- PHASEN SICHTBARKEIT --- */
-        .role-select { padding: 4px; font-size: 12px; font-weight: 600; border: 2px solid #cbd5e1; border-radius: 6px; background-color: white; color: #334e68; cursor: pointer; outline: none; width: 120px; opacity: 0; pointer-events: none; transform: translateY(-10px); transition: all 0.5s ease; }
-        .show-phase2 .role-select:not(.hidden-placeholder) { opacity: 1; pointer-events: auto; transform: translateY(0); }
-
-        .e-container { display: flex; align-items: center; gap: 4px; font-weight: bold; color: #d97706; font-size: 16px; opacity: 0; pointer-events: none; transform: translateY(-10px); transition: all 0.5s ease; }
-        .e-input { width: 30px; height: 24px; text-align: center; font-size: 16px; font-weight: bold; border: 2px solid #fcd34d; border-radius: 6px; outline: none; color: #b45309; background-color: #fffbeb; }
-        .show-phase3 .e-container:not(.hidden-placeholder) { opacity: 1; pointer-events: auto; transform: translateY(0); }
-
-        .phase4-container, .phase6-container { opacity: 0; pointer-events: none; max-height: 0; overflow: hidden; transition: all 0.8s ease; }
-        .show-phase4 .phase4-container { opacity: 1; pointer-events: auto; max-height: 500px; }
-        .show-phase6 .phase6-container { opacity: 1; pointer-events: auto; max-height: 500px; }
-
-        .phase5-element { opacity: 0; position: absolute; visibility: hidden; pointer-events: none; }
-        .show-phase5 .phase5-element { opacity: 1; position: static; visibility: visible; pointer-events: auto; transition: opacity 0.8s ease; }
-        .show-phase5 .hide-on-phase5 { display: none !important; }
-
-        .balance-board { display: flex; flex-direction: column; gap: 15px; background-color: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; margin-top: 20px; font-size: 18px; color: #334e68; }
-        .balance-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .badge { padding: 4px 10px; border-radius: 12px; font-size: 14px; font-weight: bold; }
-        .badge.red { background-color: #fee2e2; color: #b91c1c; }
-        .badge.ox { background-color: #e0e7ff; color: #4338ca; }
-        .m-input { width: 40px; height: 32px; text-align: center; font-size: 20px; font-weight: bold; border: 2px solid #c084fc; border-radius: 6px; outline: none; color: #7e22ce; background-color: #faf5ff; }
-
-        footer { margin-top: auto; padding-top: 40px; color: #94a3b8; font-size: 0.9em; text-align: center; }
+        .output-area { margin-top: 20px; }
+        textarea { width: 100%; height: 300px; padding: 15px; border: 2px solid #cbd5e1; border-radius: 8px; font-family: monospace; font-size: 14px; background-color: #f1f5f9; resize: vertical; outline: none; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
-    <div class="app-header">
-        <h1>REDOX - COACH</h1>
-        <p>Der interaktive Trainer für komplexe Ionenreaktionen</p>
+    <a href="index.html" class="btn-back">⬅ Zurück zur App</a>
+
+    <div class="header">
+        <h1>🛠️ Editor (JSON-Generator)</h1>
+        <p>Neue Gleichungen für die Datenbank erstellen</p>
     </div>
 
-    <div class="lobby-card" id="lobby">
-        <div class="control-group">
-            <label for="difficulty">Schwierigkeitsgrad wählen:</label>
-            <select id="difficulty">
-                <option value="all">🌟 ALLE Gleichungen (Zufall)</option>
-                <option value="sehr leicht">🟢 Sehr leicht</option>
-                <option value="leicht">🟡 Leicht</option>
-                <option value="mittel">🟠 Mittel</option>
-                <option value="gehoben">🔴 Gehoben</option>
-                <option value="anspruchsvoll">🔥 Anspruchsvoll</option>
-                <option value="sehr anspruchsvoll">💀 Sehr anspruchsvoll</option>
-            </select>
+    <div class="editor-container">
+        <div class="form-grid">
+            <h3>1. Allgemeine Infos</h3>
+            <div class="form-group">
+                <label>ID (Nummer)</label>
+                <input type="number" id="eq-id" placeholder="z.B. 30" value="30">
+            </div>
+            <div class="form-group">
+                <label>Schwierigkeitsgrad</label>
+                <select id="eq-diff">
+                    <option value="sehr leicht">sehr leicht</option><option value="leicht">leicht</option><option value="mittel">mittel</option>
+                    <option value="gehoben">gehoben</option><option value="anspruchsvoll">anspruchsvoll</option><option value="sehr anspruchsvoll">sehr anspruchsvoll</option>
+                </select>
+            </div>
+
+            <h3>2. Die Moleküle (Format z.B. MnO4-, Cu2+, Cr2O7^2-)</h3>
+            <div class="form-group"><label>Oxidationsmittel (Edukt 1)</label><input type="text" id="r1" placeholder="z.B. MnO4-"></div>
+            <div class="form-group"><label>Reduktionsmittel (Edukt 2)</label><input type="text" id="r2" placeholder="z.B. Fe2+"></div>
+            <div class="form-group"><label>Produkt aus Ox-Mittel</label><input type="text" id="p1" placeholder="z.B. Mn2+"></div>
+            <div class="form-group"><label>Produkt aus Red-Mittel</label><input type="text" id="p2" placeholder="z.B. Fe3+"></div>
+
+            <h3>3. Stöchiometrie (kgV & Faktoren)</h3>
+            <div class="form-group"><label>kgV Elektronen (Reduktion)</label><input type="number" id="e-red" placeholder="z.B. 5"></div>
+            <div class="form-group"><label>kgV Elektronen (Oxidation)</label><input type="number" id="e-ox" placeholder="z.B. 5"></div>
+            <div class="form-group"><label>Faktor für Ox-Mittel (vorne)</label><input type="number" id="f-ox" placeholder="z.B. 1"></div>
+            <div class="form-group"><label>Faktor für Red-Mittel (vorne)</label><input type="number" id="f-red" placeholder="z.B. 5"></div>
+
+            <button class="btn-generate" onclick="generateJSON()">⬇ JSON-Code generieren ⬇</button>
         </div>
-        <button class="btn-start" id="btn-start">Zufällige Gleichung laden 🚀</button>
-        <button class="btn-editor" onclick="alert('Hier öffnet sich in Version 2.0 der Editor!')">✏️ Eigene Gleichung eingeben (Demnächst)</button>
+
+        <div class="output-area">
+            <label>Fertiger JSON-Code (Einfach kopieren und in die redox_db.json einfügen):</label>
+            <textarea id="json-output" readonly placeholder="Hier erscheint der Code..."></textarea>
+        </div>
     </div>
-
-    <div id="equation-workspace"></div>
-
-    <footer>Erstellt von Erich Kerzendorfer mit Hilfe von Gemini 3</footer>
 
     <script>
-        let redoxDB = [];
-
-        document.addEventListener('DOMContentLoaded', () => {
-            fetch('./redox_db.json')
-                .then(response => {
-                    if(!response.ok) throw new Error("HTTP " + response.status);
-                    return response.json();
-                })
-                .then(data => { redoxDB = data; })
-                .catch(err => alert("Datenbank nicht gefunden. Läuft die Seite auf GitHub Pages?"));
-        });
-
-        document.getElementById('btn-start').addEventListener('click', () => {
-            if(redoxDB.length === 0) { alert("Datenbank lädt noch..."); return; }
-            const diff = document.getElementById('difficulty').value;
-            let filtered = diff === 'all' ? redoxDB : redoxDB.filter(eq => eq.difficulty === diff);
-            if(filtered.length === 0) { alert("Keine Gleichung für dieses Level gefunden."); return; }
-            
-            const randomEq = filtered[Math.floor(Math.random() * filtered.length)];
-            generateBoard(randomEq);
-        });
-
-        function generateBoard(eq) {
-            const r1 = eq.equation.reactants[0];
-            const r2 = eq.equation.reactants[1];
-
-            function getCoreAtom(mol) {
-                return mol.atoms.find(a => a.symbol !== 'O' && a.symbol !== 'H') || mol.atoms.find(a => a.symbol === 'O') || mol.atoms[0];
+        // Der Parser, der die Chemie-Logik aus unserem Python-Skript ins Web bringt!
+        function parseFormulaCharge(raw) {
+            let base = raw.trim(); let charge = "0";
+            if(base.includes('^')) {
+                let parts = base.split('^'); base = parts[0];
+                let c = parts[1].replace('+','').replace('-','');
+                let sign = parts[1].includes('-') ? '-' : '+';
+                charge = sign + (c==='' ? '1' : c);
+            } else if(base.endsWith('+') || base.endsWith('-')) {
+                let sign = base.slice(-1);
+                let match = base.match(/^([A-Za-z]+)(\d+)[+-]$/);
+                if(match) { base = match[1]; charge = sign + match[2]; }
+                else { base = base.slice(0, -1); charge = sign + "1"; }
             }
-            const symR1 = getCoreAtom(r1).symbol;
-
-            let p1, p2;
-            if (getCoreAtom(eq.equation.products[0]).symbol === symR1) {
-                p1 = eq.equation.products[0]; p2 = eq.equation.products[1];
-            } else {
-                p1 = eq.equation.products[1]; p2 = eq.equation.products[0];
-            }
-
-            function calcAuxCoeff(molR, molP) {
-                let coreR = getCoreAtom(molR), coreP = getCoreAtom(molP);
-                let coeffR = 1, coeffP = 1;
-                if(coreR.symbol === coreP.symbol) {
-                    if(coreR.count < coreP.count) coeffR = Math.round(coreP.count / coreR.count);
-                    if(coreR.count > coreP.count) coeffP = Math.round(coreR.count / coreP.count);
-                }
-                return { r: coeffR, p: coeffP };
-            }
-
-            const aux1 = calcAuxCoeff(r1, p1);
-            const aux2 = calcAuxCoeff(r2, p2);
-
-            const base_e_red = Math.round(eq.electrons.red_half_e / eq.factors.red_factor);
-            const base_e_ox = Math.round(eq.electrons.ox_half_e / eq.factors.ox_factor);
-
-            // --- BUGFIX: Multiplikation der Faktoren mit den Hilfskoeffizienten ---
-            const c_r1 = eq.factors.red_factor * aux1.r;
-            const c_r2 = eq.factors.ox_factor * aux2.r;
-            const c_p1 = eq.factors.red_factor * aux1.p;
-            const c_p2 = eq.factors.ox_factor * aux2.p;
-
-            function countO(mol, coeff) { let o = mol.atoms.find(a=>a.symbol==='O'); return o ? o.count * coeff : 0; }
-            function countCg(mol, coeff) { return parseInt(mol.charge || 0) * coeff; }
-
-            let leftO = countO(r1, c_r1) + countO(r2, c_r2);
-            let rightO = countO(p1, c_p1) + countO(p2, c_p2);
-            let h2o_side = leftO > rightO ? 'right' : (rightO > leftO ? 'left' : '');
-            let h2o_count = Math.abs(leftO - rightO);
-
-            let leftCg = countCg(r1, c_r1) + countCg(r2, c_r2);
-            let rightCg = countCg(p1, c_p1) + countCg(p2, c_p2);
-            let hplus_side = rightCg > leftCg ? 'left' : (leftCg > rightCg ? 'right' : '');
-            let hplus_count = Math.abs(rightCg - leftCg);
-
-            function formatCharge(c) {
-                if(!c || c==="0" || c===0) return "";
-                let s = c.toString();
-                if(s==="+1") return "+";
-                if(s==="-1") return "-";
-                if(s.startsWith("+")) return s.slice(1) + "+";
-                if(s.startsWith("-")) return s.slice(1) + "-";
-                return s;
-            }
-
-            function formatTotalCharge(c) {
-                if(c === 0) return "0";
-                return c > 0 ? "+" + c : c.toString();
-            }
-
-            function buildMolecule(mol, auxCoeff, finalCoeff) {
-                let html = '<div class="molecule">';
-                
-                html += `<div class="atom-group phase5-element">
-                            <input type="text" class="oz-input hidden-placeholder">
-                            <input type="text" class="coef-input" data-correct="${finalCoeff}" maxlength="2">
-                         </div>`;
-
-                if(auxCoeff > 1) {
-                    html += `<div class="atom-group hide-on-phase5"><input type="text" class="oz-input hidden-placeholder"><span class="coefficient">${auxCoeff}</span></div>`;
-                }
-
-                let supStr = formatCharge(mol.charge);
-                mol.atoms.forEach((atom, idx) => {
-                    let isLast = idx === mol.atoms.length - 1;
-                    let subStr = atom.count > 1 ? `<sub>${atom.count}</sub>` : '';
-                    let chargeTag = (isLast && supStr) ? `<sup>${supStr}</sup>` : '';
-                    
-                    html += `
-                    <div class="atom-group">
-                        <input type="text" class="oz-input" data-correct="${atom.oz}" maxlength="2">
-                        <span class="symbol">${atom.symbol}${subStr}${chargeTag}</span>
-                    </div>`;
-                });
-                html += '</div>';
-                return html;
-            }
-
-            function buildHPlus(count) {
-                return `
-                <div class="term-col phase5-element"><div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="operator">+</span></div><select class="role-select hidden-placeholder"></select><div class="e-container hidden-placeholder"><input type="text" class="e-input"></div></div>
-                <div class="term-col phase5-element">
-                    <div class="molecule">
-                        <div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><input type="text" class="coef-input" data-correct="${count}" maxlength="2"></div>
-                        <div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="symbol">H<sup>+</sup></span></div>
-                    </div>
-                    <select class="role-select hidden-placeholder"></select><div class="e-container hidden-placeholder"><input type="text" class="e-input"></div>
-                </div>`;
-            }
-
-            function buildH2O(count) {
-                return `
-                <div class="term-col phase5-element"><div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="operator">+</span></div><select class="role-select hidden-placeholder"></select><div class="e-container hidden-placeholder"><input type="text" class="e-input"></div></div>
-                <div class="term-col phase5-element">
-                    <div class="molecule">
-                        <div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><input type="text" class="coef-input" data-correct="${count}" maxlength="2"></div>
-                        <div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="symbol">H<sub>2</sub>O</span></div>
-                    </div>
-                    <select class="role-select hidden-placeholder"></select><div class="e-container hidden-placeholder"><input type="text" class="e-input"></div>
-                </div>`;
-            }
-
-            let reactantsHTML = `
-                <div class="term-col">
-                    ${buildMolecule(r1, aux1.r, c_r1)}
-                    <select class="role-select" data-correct="ox1"><option value="">-- Rolle wählen --</option><option value="ox1">Ox1 (nimmt e⁻)</option><option value="red2">Red2 (gibt e⁻)</option></select>
-                    <div class="e-container"><input type="text" class="e-input" data-correct="${base_e_red}" maxlength="2"> e⁻</div>
-                </div>
-                <div class="term-col"><div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="operator">+</span></div><select class="role-select hidden-placeholder"></select><div class="e-container hidden-placeholder"><input type="text" class="e-input"></div></div>
-                <div class="term-col">
-                    ${buildMolecule(r2, aux2.r, c_r2)}
-                    <select class="role-select" data-correct="red2"><option value="">-- Rolle wählen --</option><option value="ox1">Ox1 (nimmt e⁻)</option><option value="red2">Red2 (gibt e⁻)</option></select>
-                    <div class="e-container"><input type="text" class="e-input" data-correct="${base_e_ox}" maxlength="2"> e⁻</div>
-                </div>`;
-            
-            if(hplus_side === 'left') reactantsHTML += buildHPlus(hplus_count);
-            if(h2o_side === 'left') reactantsHTML += buildH2O(h2o_count);
-
-            let productsHTML = `
-                <div class="term-col">
-                    ${buildMolecule(p1, aux1.p, c_p1)}
-                    <select class="role-select" data-correct="red1"><option value="">-- Rolle wählen --</option><option value="red1">Red1 (reduziert)</option><option value="ox2">Ox2 (oxidiert)</option></select>
-                    <div class="e-container"><input type="text" class="e-input" data-correct="${base_e_red}" maxlength="2"> e⁻</div>
-                </div>
-                <div class="term-col"><div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="operator">+</span></div><select class="role-select hidden-placeholder"></select><div class="e-container hidden-placeholder"><input type="text" class="e-input"></div></div>
-                <div class="term-col">
-                    ${buildMolecule(p2, aux2.p, c_p2)}
-                    <select class="role-select" data-correct="ox2"><option value="">-- Rolle wählen --</option><option value="red1">Red1 (reduziert)</option><option value="ox2">Ox2 (oxidiert)</option></select>
-                    <div class="e-container"><input type="text" class="e-input" data-correct="${base_e_ox}" maxlength="2"> e⁻</div>
-                </div>`;
-            
-            if(hplus_side === 'right') productsHTML += buildHPlus(hplus_count);
-            if(h2o_side === 'right') productsHTML += buildH2O(h2o_count);
-
-            const finalChargeLeft = formatTotalCharge(leftCg + (hplus_side === 'left' ? hplus_count : 0));
-            const finalChargeRight = formatTotalCharge(rightCg + (hplus_side === 'right' ? hplus_count : 0));
-
-            const boardHTML = `
-            <div class="equation-board" id="board">
-                <h2 id="main-title">Phase 1: Oxidationszahlen</h2>
-                <p class="instruction" id="instruction-text">Gleichung Nr. ${eq.id} (${eq.difficulty})<br>Bestimme die Oxidationszahlen (Format: +6, -2, 0).</p>
-
-                <div class="equation-row">
-                    ${reactantsHTML}
-                    <div class="term-col"><div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="operator">&rarr;</span></div><select class="role-select hidden-placeholder"></select><div class="e-container hidden-placeholder"><input type="text" class="e-input"></div></div>
-                    ${productsHTML}
-                </div>
-
-                <div class="phase4-container">
-                    <hr>
-                    <h2 style="font-size: 24px;">Phase 4: Elektronenbilanz</h2>
-                    <div class="balance-board">
-                        <div class="balance-row">
-                            <div class="balance-label"><span class="badge red">Reduktion</span>(Ox1 &rarr; Red1) nimmt <span class="e-count" style="margin-left:5px;">${base_e_red} e⁻</span> auf</div>
-                            <div class="multiplier-group">&times; <input type="text" class="m-input" data-correct="${eq.factors.red_factor}" maxlength="2"></div>
-                        </div>
-                        <div class="balance-row">
-                            <div class="balance-label"><span class="badge ox">Oxidation</span>(Red2 &rarr; Ox2) gibt <span class="e-count" style="margin-left:5px;">${base_e_ox} e⁻</span> ab</div>
-                            <div class="multiplier-group">&times; <input type="text" class="m-input" data-correct="${eq.factors.ox_factor}" maxlength="2"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="phase6-container">
-                    <hr>
-                    <h2 style="font-size: 24px;">Phase 6: Die finale Kontrolle</h2>
-                    <p class="instruction" style="margin-bottom:20px;">Stimmt die Ladungsbilanz? Trage die Summe aller Ladungen links und rechts ein (Format: +6, -2, 0).<br><span style="font-size:0.85em; color:#94a3b8;">Fleißaufgabe: Kontrolliere für dich im Kopf auch die Elementbilanz!</span></p>
-                    <div class="balance-board" style="flex-direction: row; justify-content: space-around; background-color: #f1f5f9;">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <label style="font-weight: 600;">Gesamtladung Edukte:</label>
-                            <input type="text" class="charge-input" data-correct="${finalChargeLeft}" maxlength="3">
-                        </div>
-                        <div style="font-size: 24px; font-weight: bold; color: #94a3b8;">=</div>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <label style="font-weight: 600;">Gesamtladung Produkte:</label>
-                            <input type="text" class="charge-input" data-correct="${finalChargeRight}" maxlength="3">
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="success-message" style="display:none; margin-top: 30px; padding: 20px; background: #d1fae5; color: #065f46; border-radius: 8px; font-weight: bold; font-size: 1.2em; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                    🏆 Meisterhaft! Du hast die komplette Redoxgleichung gelöst!<br>
-                    <button onclick="location.reload()" style="margin-top: 15px; padding: 10px 20px; cursor: pointer; border-radius: 6px; border: none; background: #059669; color: white; font-weight: bold; font-size:16px; transition: 0.2s;">Nächste Gleichung lösen</button>
-                </div>
-            </div>`;
-
-            document.getElementById('equation-workspace').innerHTML = boardHTML;
-            document.getElementById('lobby').style.display = 'none';
-            document.getElementById('equation-workspace').style.display = 'block';
-            setupValidationLogic();
+            return {base, charge};
         }
 
-        function setupValidationLogic() {
-            const board = document.getElementById('board');
-            const title = document.getElementById('main-title');
-            const inst = document.getElementById('instruction-text');
+        function parseAtoms(base) {
+            let atoms = [];
+            let matches = [...base.matchAll(/([A-Z][a-z]*)(\d*)/g)];
+            matches.forEach(m => {
+                atoms.push({symbol: m[1], count: parseInt(m[2] || 1)});
+            });
+            return atoms;
+        }
 
-            function checkAll(selector) { return Array.from(document.querySelectorAll(selector)).every(el => el.classList.contains('correct')); }
-            
-            function bindInputs(selector, nextPhaseFunc) {
-                document.querySelectorAll(selector).forEach(el => {
-                    el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', function() {
-                        this.classList.remove('correct', 'incorrect');
-                        let val = this.value.trim();
-                        if(val !== '' && val !== '+' && val !== '-') {
-                            if (val === this.dataset.correct) this.classList.add('correct');
-                            else this.classList.add('incorrect');
-                            nextPhaseFunc();
-                        }
-                    });
-                });
+        function calculateOZ(atoms, charge) {
+            let cVal = parseInt(charge);
+            if(atoms.length === 1) return [{...atoms[0], oz: cVal===0 ? "0" : (cVal>0?"+"+cVal:cVal.toString())}];
+            let o = atoms.find(a=>a.symbol==='O'); let oCount = o?o.count:0;
+            let h = atoms.find(a=>a.symbol==='H'); let hCount = h?h.count:0;
+            return atoms.map(a => {
+                if(a.symbol==='O') return {...a, oz: "-2"};
+                if(a.symbol==='H') return {...a, oz: "+1"};
+                let remain = cVal - (oCount*-2 + hCount*1);
+                let ozVal = remain / a.count;
+                let ozStr = ozVal>0 ? "+"+ozVal : ozVal.toString();
+                if(ozStr === "0") ozStr = "0";
+                return {...a, oz: ozStr};
+            });
+        }
+
+        function buildSpecies(rawFormula) {
+            let {base, charge} = parseFormulaCharge(rawFormula);
+            let atoms = parseAtoms(base);
+            let atomsWithOZ = calculateOZ(atoms, charge);
+            return { formula_text: base, charge: charge, atoms: atomsWithOZ };
+        }
+
+        function generateJSON() {
+            try {
+                let entry = {
+                    id: parseInt(document.getElementById('eq-id').value),
+                    difficulty: document.getElementById('eq-diff').value,
+                    agents: {
+                        ox_mittel: document.getElementById('r1').value,
+                        red_mittel: document.getElementById('r2').value
+                    },
+                    equation: {
+                        reactants: [
+                            buildSpecies(document.getElementById('r1').value),
+                            buildSpecies(document.getElementById('r2').value)
+                        ],
+                        products: [
+                            buildSpecies(document.getElementById('p1').value),
+                            buildSpecies(document.getElementById('p2').value)
+                        ]
+                    },
+                    electrons: {
+                        ox_half_e: parseInt(document.getElementById('e-ox').value),
+                        red_half_e: parseInt(document.getElementById('e-red').value)
+                    },
+                    factors: {
+                        ox_factor: parseInt(document.getElementById('f-ox').value),
+                        red_factor: parseInt(document.getElementById('f-red').value)
+                    },
+                    balancing: { h_plus_count: 0, h2o_count: 0 } // Wird in V1.0 eh dynamisch berechnet!
+                };
+                
+                // Füge ein Komma am Ende hinzu, damit es nahtlos in die DB passt
+                document.getElementById('json-output').value = JSON.stringify(entry, null, 2) + ",";
+            } catch (e) {
+                alert("Fehler beim Erstellen! Hast du alle Felder ausgefüllt?\n" + e);
             }
-
-            bindInputs('.oz-input[data-correct]', () => {
-                if(checkAll('.oz-input[data-correct]')) {
-                    inst.style.opacity = 0;
-                    setTimeout(() => {
-                        title.innerText = "Phase 2: Redoxpaare";
-                        inst.innerHTML = "Ordne die Rollen (Ox1/Red1 und Red2/Ox2) zu.";
-                        inst.style.opacity = 1; board.classList.add('show-phase2');
-                    }, 300);
-                }
-            });
-
-            bindInputs('.role-select[data-correct]', () => {
-                if(checkAll('.role-select[data-correct]')) {
-                    inst.style.opacity = 0;
-                    setTimeout(() => {
-                        title.innerText = "Phase 3: Elektronenübergang";
-                        inst.innerHTML = "Wie viele Elektronen (e⁻) werden insgesamt pro Teilchen aufgenommen bzw. abgegeben?";
-                        inst.style.opacity = 1; board.classList.add('show-phase3');
-                    }, 300);
-                }
-            });
-
-            bindInputs('.e-input[data-correct]', () => {
-                if(checkAll('.e-input[data-correct]')) {
-                    inst.style.opacity = 0;
-                    setTimeout(() => {
-                        title.innerText = "Phase 4: Die Multiplikatoren";
-                        inst.innerHTML = "Ermittle das kleinste gemeinsame Vielfache (kgV) der Elektronen.";
-                        inst.style.opacity = 1; board.classList.add('show-phase4');
-                    }, 300);
-                }
-            });
-
-            bindInputs('.m-input[data-correct]', () => {
-                if(checkAll('.m-input[data-correct]')) {
-                    inst.style.opacity = 0;
-                    setTimeout(() => {
-                        title.innerHTML = "Phase 5: Stoffbilanz (H<sup>+</sup> und H<sub>2</sub>O)";
-                        inst.innerHTML = "Gleiche die Atome und Ladungen aus.<br>Nutze die Boxen, um die finalen Koeffizienten festzulegen.";
-                        inst.style.opacity = 1; board.classList.add('show-phase5');
-                    }, 300);
-                }
-            });
-
-            bindInputs('.coef-input[data-correct]', () => {
-                if(checkAll('.coef-input[data-correct]')) {
-                    inst.style.opacity = 0;
-                    setTimeout(() => {
-                        title.innerText = "Phase 6: Die finale Kontrolle";
-                        inst.style.opacity = 1; board.classList.add('show-phase6');
-                    }, 300);
-                }
-            });
-
-            bindInputs('.charge-input[data-correct]', () => {
-                if(checkAll('.charge-input[data-correct]')) {
-                    document.getElementById('success-message').style.display = 'block';
-                }
-            });
         }
     </script>
 </body>
