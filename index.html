@@ -164,17 +164,16 @@
             fetch('./redox_db.json')
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Datenbank konnte nicht geladen werden. Läuft der Live-Server?');
+                        throw new Error(`HTTP-Fehler ${response.status} (Datei wirklich nicht gefunden. GitHub lädt noch!)`);
                     }
-                    return response.json();
+                    return response.json(); // Hier wird das JSON übersetzt
                 })
-                .then(data => {
-                    redoxDB = data;
-                    console.log(`Erfolg! ${redoxDB.length} Gleichungen geladen.`);
+                .then(data => { 
+                    redoxDB = data; 
+                    console.log("Erfolgreich geladen:", data);
                 })
-                .catch(error => {
-                    console.error('Fehler:', error);
-                    alert("Achtung: Die Datei redox_db.json wurde nicht gefunden. Bitte über einen lokalen Webserver öffnen!");
+                .catch(err => {
+                    alert("Genaue Fehleranalyse:\n\n" + err.message + "\n\nTipp: Wenn hier 'Unexpected token' oder 'SyntaxError' steht, fehlt in der redox_db.json sehr wahrscheinlich nur eine Klammer ganz am Ende!");
                 });
         });
 
