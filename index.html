@@ -94,27 +94,42 @@
     <footer>Erstellt von Erich Kerzendorfer mit Hilfe von Gemini 3</footer>
 
     <script>
+        // Log für die Konsole, damit wir sehen, dass das JS nicht abgestürzt ist!
+        console.log("REDOX-COACH Skript wurde erfolgreich gestartet.");
+
         let redoxDB = [];
 
-        // 1. Datenbank laden
+        // 1. Datenbank laden (Robust und fehlertolerant)
         document.addEventListener('DOMContentLoaded', () => {
             fetch('./redox_db.json')
                 .then(response => {
                     if(!response.ok) throw new Error("HTTP " + response.status);
                     return response.json();
                 })
-                .then(data => { redoxDB = data; console.log("Geladen:", data.length); })
-                .catch(err => console.error("DB Ladefehler:", err));
+                .then(data => { 
+                    redoxDB = data; 
+                    console.log("Datenbank erfolgreich geladen. Anzahl Gleichungen:", data.length); 
+                })
+                .catch(err => {
+                    console.error("DB Ladefehler:", err);
+                    alert("Achtung: Die Datei redox_db.json konnte nicht geladen werden.\nLösung: Hast du sie auf GitHub hochgeladen und Strg+F5 gedrückt?");
+                });
         });
 
         // 2. Start-Button Logik
         document.getElementById('btn-start').addEventListener('click', () => {
-            if(redoxDB.length === 0) { alert("Datenbank lädt noch..."); return; }
+            if(redoxDB.length === 0) { 
+                alert("Die Datenbank wird noch geladen oder es gab einen Fehler. Bitte warte einen Moment oder drücke F5."); 
+                return; 
+            }
             
             const diff = document.getElementById('difficulty').value;
             let filtered = diff === 'all' ? redoxDB : redoxDB.filter(eq => eq.difficulty === diff);
             
-            if(filtered.length === 0) { alert("Keine Gleichung für dieses Level gefunden."); return; }
+            if(filtered.length === 0) { 
+                alert("Keine Gleichung für dieses Level in der Datenbank gefunden."); 
+                return; 
+            }
             
             const randomEq = filtered[Math.floor(Math.random() * filtered.length)];
             generateBoard(randomEq);
@@ -127,7 +142,7 @@
             const p1 = eq.equation.products[0];
             const p2 = eq.equation.products[1];
 
-            // Hilfsfunktion: Formatiert die Ladung (z.B. "-2" -> "2-", "+1" -> "+")
+            // Hilfsfunktion: Formatiert die Ladung
             function formatCharge(c) {
                 if(!c || c==="0" || c===0) return "";
                 let s = c.toString();
@@ -187,4 +202,37 @@
                         <div class="e-container"><input type="text" class="e-input" data-correct="${eq.electrons.red_half_e}" maxlength="2"> e⁻</div>
                     </div>
 
-                    <div class="term-col"><div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="operator">+</span></div><select class="role-select hidden-placeholder
+                    <div class="term-col"><div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="operator">+</span></div><select class="role-select hidden-placeholder"></select><div class="e-container hidden-placeholder"><input type="text" class="e-input"></div></div>
+
+                    <div class="term-col">
+                        ${buildMolecule(p2)}
+                        <select class="role-select" data-correct="ox2"><option value="">-- Rolle wählen --</option><option value="red1">Red1 (reduziert)</option><option value="ox2">Ox2 (oxidiert)</option></select>
+                        <div class="e-container"><input type="text" class="e-input" data-correct="${eq.electrons.ox_half_e}" maxlength="2"> e⁻</div>
+                    </div>
+                </div>
+
+                <div class="phase4-container">
+                    <hr>
+                    <h2 style="font-size: 24px;">Phase 4: Elektronenbilanz</h2>
+                    <div class="balance-board">
+                        <div class="balance-row">
+                            <div class="balance-label"><span class="badge red">Reduktion</span>(Ox1 &rarr; Red1) nimmt <span class="e-count" style="margin-left:5px;">${eq.electrons.red_half_e} e⁻</span> auf</div>
+                            <div class="multiplier-group">&times; <input type="text" class="m-input" data-correct="${eq.factors.red_factor}" maxlength="2"></div>
+                        </div>
+                        <div class="balance-row">
+                            <div class="balance-label"><span class="badge ox">Oxidation</span>(Red2 &rarr; Ox2) gibt <span class="e-count" style="margin-left:5px;">${eq.electrons.ox_half_e} e⁻</span> ab</div>
+                            <div class="multiplier-group">&times; <input type="text" class="m-input" data-correct="${eq.factors.ox_factor}" maxlength="2"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="success-message" style="display:none; margin-top: 30px; padding: 20px; background: #d1fae5; color: #065f46; border-radius: 8px; font-weight: bold; font-size: 1.2em; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    🏆 Meisterhaft! Du hast das kgV gefunden.<br>
+                    <span style="font-size: 0.85em; font-weight: normal;">Notiere dir nun die Faktoren auf einem Zettel und gleiche die H⁺ und H₂O Moleküle aus!</span><br>
+                    <button onclick="location.reload()" style="margin-top: 15px; padding: 10px 20px; cursor: pointer; border-radius: 6px; border: none; background: #059669; color: white; font-weight: bold; font-size:16px; transition: 0.2s;">Nächste Gleichung lösen</button>
+                </div>
+            </div>`;
+
+            // UI umbauen
+            document.getElementById('equation-workspace').innerHTML = boardHTML;
+            document.getElementById
