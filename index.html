@@ -1,1 +1,212 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REDOX - COACH</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: #334e68;
+        }
 
+        /* --- HEADER & TITEL --- */
+        .app-header {
+            text-align: center;
+            margin-bottom: 30px;
+            margin-top: 20px;
+        }
+        .app-header h1 {
+            font-size: 2.8em;
+            color: #102a43;
+            margin: 0;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.05);
+        }
+        .app-header p {
+            color: #627d98;
+            font-size: 1.2em;
+            margin-top: 5px;
+        }
+
+        /* --- DIE LOBBY (Startbildschirm) --- */
+        .lobby-card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 30px;
+        }
+
+        .control-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        .control-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #486581;
+        }
+        
+        select {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            background-color: #f8fafc;
+            color: #334e68;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        select:focus { border-color: #3b82f6; }
+
+        /* --- BUTTONS --- */
+        .btn-start {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        .btn-start:hover { background-color: #2563eb; }
+        .btn-start:active { transform: scale(0.98); }
+
+        .btn-editor {
+            background-color: transparent;
+            color: #627d98;
+            border: 2px dashed #cbd5e1;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        .btn-editor:hover { border-color: #94a3b8; color: #334e68; background-color: #f1f5f9; }
+
+        /* --- FOOTER --- */
+        footer {
+            margin-top: auto; /* Drückt den Footer nach ganz unten */
+            padding-top: 40px;
+            color: #94a3b8;
+            font-size: 0.9em;
+            text-align: center;
+        }
+
+        /* Platzhalter für das spätere Gleichungs-Board */
+        #equation-workspace {
+            display: none; /* Ist am Anfang unsichtbar */
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-header">
+        <h1>REDOX - COACH</h1>
+        <p>Der interaktive Trainer für komplexe Ionenreaktionen</p>
+    </div>
+
+    <div class="lobby-card" id="lobby">
+        <div class="control-group">
+            <label for="difficulty">Schwierigkeitsgrad wählen:</label>
+            <select id="difficulty">
+                <option value="all">🌟 ALLE Gleichungen (Mix)</option>
+                <option value="sehr leicht">🟢 Sehr leicht (Einfacher e⁻-Übergang)</option>
+                <option value="leicht">🟡 Leicht (Kleine Moleküle)</option>
+                <option value="mittel">🟠 Mittel (z. B. Permanganat, Dichromat)</option>
+                <option value="gehoben">🔴 Gehoben (Schwerer Ausgleich)</option>
+                <option value="anspruchsvoll">🔥 Anspruchsvoll (Komplexe Stöchiometrie)</option>
+                <option value="sehr anspruchsvoll">💀 Sehr anspruchsvoll (Organik)</option>
+            </select>
+        </div>
+
+        <button class="btn-start" id="btn-start">Zufällige Gleichung laden 🚀</button>
+        
+        <button class="btn-editor" onclick="alert('Hier öffnet sich später der Editor für eigene Gleichungen!')">
+            ✏️ Eigene Gleichung eingeben (Editor - Demnächst)
+        </button>
+    </div>
+
+    <div id="equation-workspace">
+        </div>
+
+    <footer>
+        Erstellt von Erich Kerzendorfer mit Hilfe von Gemini 3
+    </footer>
+
+    <script>
+        // --- DIE LOGIK ---
+        let redoxDB = []; // Hier speichern wir die JSON-Daten
+
+        // 1. Lade die JSON-Datenbank beim Start der Seite
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('redox_db.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Datenbank konnte nicht geladen werden. Läuft der Live-Server?');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    redoxDB = data;
+                    console.log(`Erfolg! ${redoxDB.length} Gleichungen geladen.`);
+                })
+                .catch(error => {
+                    console.error('Fehler:', error);
+                    alert("Achtung: Die Datei redox_db.json wurde nicht gefunden. Bitte über einen lokalen Webserver öffnen!");
+                });
+        });
+
+        // 2. Klick auf den Start-Button
+        document.getElementById('btn-start').addEventListener('click', () => {
+            if(redoxDB.length === 0) {
+                alert("Datenbank lädt noch oder fehlt!");
+                return;
+            }
+
+            const selectedDifficulty = document.getElementById('difficulty').value;
+            
+            // 3. Filtern der Datenbank
+            let filteredEqs = redoxDB;
+            if(selectedDifficulty !== 'all') {
+                filteredEqs = redoxDB.filter(eq => eq.difficulty === selectedDifficulty);
+            }
+
+            if(filteredEqs.length === 0) {
+                alert("Für diesen Schwierigkeitsgrad gibt es keine Gleichungen.");
+                return;
+            }
+
+            // 4. Zufällige Gleichung aus der gefilterten Liste wählen
+            const randomIndex = Math.floor(Math.random() * filteredEqs.length);
+            const chosenEquation = filteredEqs[randomIndex];
+
+            console.log("Ausgewählte Gleichung:", chosenEquation);
+            
+            // HIER STARTET DANN UNSER GENERATOR!
+            alert(`Gleichung Nr. ${chosenEquation.id} (${chosenEquation.difficulty}) wurde gewählt!\nIm nächsten Schritt bauen wir den Generator, der jetzt das Board aufbaut.`);
+        });
+    </script>
+</body>
+</html>
