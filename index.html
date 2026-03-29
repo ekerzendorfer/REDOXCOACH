@@ -158,13 +158,12 @@
             const base_e_red = Math.round(eq.electrons.red_half_e / eq.factors.red_factor);
             const base_e_ox = Math.round(eq.electrons.ox_half_e / eq.factors.ox_factor);
 
-            // Dynamische Koeffizienten für Phase 5
-            const c_r1 = eq.factors.red_factor;
-            const c_r2 = eq.factors.ox_factor;
-            const c_p1 = Math.round(c_r1 * getCoreAtom(r1).count / getCoreAtom(p1).count);
-            const c_p2 = Math.round(c_r2 * getCoreAtom(r2).count / getCoreAtom(p2).count);
+            // --- BUGFIX: Multiplikation der Faktoren mit den Hilfskoeffizienten ---
+            const c_r1 = eq.factors.red_factor * aux1.r;
+            const c_r2 = eq.factors.ox_factor * aux2.r;
+            const c_p1 = eq.factors.red_factor * aux1.p;
+            const c_p2 = eq.factors.ox_factor * aux2.p;
 
-            // Dynamische Berechnung für H+ und H2O
             function countO(mol, coeff) { let o = mol.atoms.find(a=>a.symbol==='O'); return o ? o.count * coeff : 0; }
             function countCg(mol, coeff) { return parseInt(mol.charge || 0) * coeff; }
 
@@ -196,7 +195,6 @@
             function buildMolecule(mol, auxCoeff, finalCoeff) {
                 let html = '<div class="molecule">';
                 
-                // Input Feld für Phase 5
                 html += `<div class="atom-group phase5-element">
                             <input type="text" class="oz-input hidden-placeholder">
                             <input type="text" class="coef-input" data-correct="${finalCoeff}" maxlength="2">
