@@ -784,3 +784,506 @@
         {
           "formula_text": "Cr2O7",
           "charge": "-2",
+          "atoms": [
+            { "symbol": "Cr", "count": 2, "oz": "+6" },
+            { "symbol": "O", "count": 7, "oz": "-2" }
+          ]
+        },
+        {
+          "formula_text": "H2S",
+          "charge": "0",
+          "atoms": [
+            { "symbol": "H", "count": 2, "oz": "+1" },
+            { "symbol": "S", "count": 1, "oz": "-2" }
+          ]
+        }
+      ],
+      "products": [
+        {
+          "formula_text": "Cr",
+          "charge": "+3",
+          "atoms": [
+            { "symbol": "Cr", "count": 1, "oz": "+3" }
+          ]
+        },
+        {
+          "formula_text": "S",
+          "charge": "0",
+          "atoms": [
+            { "symbol": "S", "count": 1, "oz": "0" }
+          ]
+        }
+      ]
+    },
+    "electrons": {
+      "ox_half_e": 6,
+      "red_half_e": 6
+    },
+    "factors": {
+      "ox_factor": 3,
+      "red_factor": 1
+    },
+    "balancing": {
+      "h_plus_count": 8,
+      "h2o_count": 7
+    }
+  },
+  {
+    "id": 21,
+    "difficulty": "anspruchsvoll",
+    "agents": {
+      "ox_mittel": "ClO3-",
+      "red_mittel": "I-"
+    },
+    "equation": {
+      "reactants": [
+        {
+          "formula_text": "ClO",
+          "charge": "-3",
+          "atoms": [
+            { "symbol": "Cl", "count": 1, "oz": "-1" },
+            { "symbol": "O", "count": 1, "oz": "-2" }
+          ]
+        },
+        {
+          "formula_text": "I",
+          "charge": "-1",
+          "atoms": [
+            { "symbol": "I", "count": 1, "oz": "-1" }
+          ]
+        }
+      ],
+      "products": [
+        {
+          "formula_text": "Cl",
+          "charge": "-1",
+          "atoms": [
+            { "symbol": "Cl", "count": 1, "oz": "-1" }
+          ]
+        },
+        {
+          "formula_text": "I2",
+          "charge": "0",
+          "atoms": [
+            { "symbol": "I", "count": 2, "oz": "0" }
+          ]
+        }
+      ]
+    },
+    "electrons": {
+      "ox_half_e": 6,
+      "red_half_e": 6
+    },
+    "factors": {
+      "ox_factor": 3,
+      "red_factor": 1
+    },
+    "balancing": {
+      "h_plus_count": 6,
+      "h2o_count": 3
+    }
+  },
+  {
+    "id": 23,
+    "difficulty": "anspruchsvoll",
+    "agents": {
+      "ox_mittel": "MnO2",
+      "red_mittel": "Cl-"
+    },
+    "equation": {
+      "reactants": [
+        {
+          "formula_text": "MnO2",
+          "charge": "0",
+          "atoms": [
+            { "symbol": "Mn", "count": 1, "oz": "+4" },
+            { "symbol": "O", "count": 2, "oz": "-2" }
+          ]
+        },
+        {
+          "formula_text": "Cl",
+          "charge": "-1",
+          "atoms": [
+            { "symbol": "Cl", "count": 1, "oz": "-1" }
+          ]
+        }
+      ],
+      "products": [
+        {
+          "formula_text": "Mn",
+          "charge": "+2",
+          "atoms": [
+            { "symbol": "Mn", "count": 1, "oz": "+2" }
+          ]
+        },
+        {
+          "formula_text": "Cl2",
+          "charge": "0",
+          "atoms": [
+            { "symbol": "Cl", "count": 2, "oz": "0" }
+          ]
+        }
+      ]
+    },
+    "electrons": {
+      "ox_half_e": 2,
+      "red_half_e": 2
+    },
+    "factors": {
+      "ox_factor": 1,
+      "red_factor": 1
+    },
+    "balancing": {
+      "h_plus_count": 4,
+      "h2o_count": 2
+    }
+  },
+  {
+    "id": 24,
+    "difficulty": "anspruchsvoll",
+    "agents": {
+      "ox_mittel": "Cr2O7^2-",
+      "red_mittel": "H2O2"
+    },
+    "equation": {
+      "reactants": [
+        {
+          "formula_text": "Cr2O7",
+          "charge": "-2",
+          "atoms": [
+            { "symbol": "Cr", "count": 2, "oz": "+6" },
+            { "symbol": "O", "count": 7, "oz": "-2" }
+          ]
+        },
+        {
+          "formula_text": "H2O2",
+          "charge": "0",
+          "atoms": [
+            { "symbol": "H", "count": 2, "oz": "+1" },
+            { "symbol": "O", "count": 2, "oz": "-1" }
+          ]
+        }
+      ],
+      "products": [
+        {
+          "formula_text": "Cr",
+          "charge": "+3",
+          "atoms": [
+            { "symbol": "Cr", "count": 1, "oz": "+3" }
+          ]
+        },
+        {
+          "formula_text": "O2",
+          "charge": "0",
+          "atoms": [
+            { "symbol": "O", "count": 2, "oz": "0" }
+          ]
+        }
+      ]
+    },
+    "electrons": {
+      "ox_half_e": 6,
+      "red_half_e": 6
+    },
+    "factors": {
+      "ox_factor": 3,
+      "red_factor": 1
+    },
+    "balancing": {
+      "h_plus_count": 8,
+      "h2o_count": 7
+    }
+  },
+  {
+    "id": 25,
+    "difficulty": "anspruchsvoll",
+    "agents": {
+      "ox_mittel": "Cr2O7^2-",
+      "red_mittel": "CH3CH2OH"
+    },
+    "equation": {
+      "reactants": [
+        {
+          "formula_text": "Cr2O7",
+          "charge": "-2",
+          "atoms": [
+            { "symbol": "Cr", "count": 2, "oz": "+6" },
+            { "symbol": "O", "count": 7, "oz": "-2" }
+          ]
+        },
+        {
+          "formula_text": "CH3CH2OH",
+          "charge": "0",
+          "atoms": [
+            { "symbol": "C", "count": 2, "oz": "-2" },
+            { "symbol": "H", "count": 6, "oz": "+1" },
+            { "symbol": "O", "count": 1, "oz": "-2" }
+          ]
+        }
+      ],
+      "products": [
+        {
+          "formula_text": "Cr",
+          "charge": "+3",
+          "atoms": [
+            { "symbol": "Cr", "count": 1, "oz": "+3" }
+          ]
+        },
+        {
+          "formula_text": "CH3CHO",
+          "charge": "0",
+          "atoms": [
+            { "symbol": "C", "count": 2, "oz": "-1" },
+            { "symbol": "H", "count": 4, "oz": "+1" },
+            { "symbol": "O", "count": 1, "oz": "-2" }
+          ]
+        }
+      ]
+    },
+    "electrons": {
+      "ox_half_e": 6,
+      "red_half_e": 6
+    },
+    "factors": {
+      "ox_factor": 3,
+      "red_factor": 1
+    },
+    "balancing": {
+      "h_plus_count": 8,
+      "h2o_count": 7
+    }
+  },
+  {
+    "id": 26,
+    "difficulty": "sehr anspruchsvoll",
+    "agents": {
+      "ox_mittel": "MnO4-",
+      "red_mittel": "CH3CH2OH"
+    },
+    "equation": {
+      "reactants": [
+        {
+          "formula_text": "MnO",
+          "charge": "-4",
+          "atoms": [
+            { "symbol": "Mn", "count": 1, "oz": "-2" },
+            { "symbol": "O", "count": 1, "oz": "-2" }
+          ]
+        },
+        {
+          "formula_text": "CH3CH2OH",
+          "charge": "0",
+          "atoms": [
+            { "symbol": "C", "count": 2, "oz": "-2" },
+            { "symbol": "H", "count": 6, "oz": "+1" },
+            { "symbol": "O", "count": 1, "oz": "-2" }
+          ]
+        }
+      ],
+      "products": [
+        {
+          "formula_text": "Mn",
+          "charge": "+2",
+          "atoms": [
+            { "symbol": "Mn", "count": 1, "oz": "+2" }
+          ]
+        },
+        {
+          "formula_text": "CH3COOH",
+          "charge": "0",
+          "atoms": [
+            { "symbol": "C", "count": 2, "oz": "0" },
+            { "symbol": "H", "count": 4, "oz": "+1" },
+            { "symbol": "O", "count": 2, "oz": "-2" }
+          ]
+        }
+      ]
+    },
+    "electrons": {
+      "ox_half_e": 20,
+      "red_half_e": 20
+    },
+    "factors": {
+      "ox_factor": 5,
+      "red_factor": 4
+    },
+    "balancing": {
+      "h_plus_count": 12,
+      "h2o_count": 11
+    }
+  },
+  {
+    "id": 27,
+    "difficulty": "sehr anspruchsvoll",
+    "agents": {
+      "ox_mittel": "Cr2O7^2-",
+      "red_mittel": "CH3COOH"
+    },
+    "equation": {
+      "reactants": [
+        {
+          "formula_text": "Cr2O7",
+          "charge": "-2",
+          "atoms": [
+            { "symbol": "Cr", "count": 2, "oz": "+6" },
+            { "symbol": "O", "count": 7, "oz": "-2" }
+          ]
+        },
+        {
+          "formula_text": "CH3COOH",
+          "charge": "0",
+          "atoms": [
+            { "symbol": "C", "count": 2, "oz": "0" },
+            { "symbol": "H", "count": 4, "oz": "+1" },
+            { "symbol": "O", "count": 2, "oz": "-2" }
+          ]
+        }
+      ],
+      "products": [
+        {
+          "formula_text": "Cr",
+          "charge": "+3",
+          "atoms": [
+            { "symbol": "Cr", "count": 1, "oz": "+3" }
+          ]
+        },
+        {
+          "formula_text": "CO2",
+          "charge": "0",
+          "atoms": [
+            { "symbol": "C", "count": 1, "oz": "+4" },
+            { "symbol": "O", "count": 2, "oz": "-2" }
+          ]
+        }
+      ]
+    },
+    "electrons": {
+      "ox_half_e": 24,
+      "red_half_e": 24
+    },
+    "factors": {
+      "ox_factor": 3,
+      "red_factor": 4
+    },
+    "balancing": {
+      "h_plus_count": 16,
+      "h2o_count": 14
+    }
+  },
+  {
+    "id": 28,
+    "difficulty": "sehr anspruchsvoll",
+    "agents": {
+      "ox_mittel": "Cr2O7^2-",
+      "red_mittel": "As2O3"
+    },
+    "equation": {
+      "reactants": [
+        {
+          "formula_text": "Cr2O7",
+          "charge": "-2",
+          "atoms": [
+            { "symbol": "Cr", "count": 2, "oz": "+6" },
+            { "symbol": "O", "count": 7, "oz": "-2" }
+          ]
+        },
+        {
+          "formula_text": "As2O3",
+          "charge": "0",
+          "atoms": [
+            { "symbol": "As", "count": 2, "oz": "+3" },
+            { "symbol": "O", "count": 3, "oz": "-2" }
+          ]
+        }
+      ],
+      "products": [
+        {
+          "formula_text": "Cr",
+          "charge": "+3",
+          "atoms": [
+            { "symbol": "Cr", "count": 1, "oz": "+3" }
+          ]
+        },
+        {
+          "formula_text": "H3AsO4",
+          "charge": "0",
+          "atoms": [
+            { "symbol": "H", "count": 3, "oz": "+1" },
+            { "symbol": "As", "count": 1, "oz": "+5" },
+            { "symbol": "O", "count": 4, "oz": "-2" }
+          ]
+        }
+      ]
+    },
+    "electrons": {
+      "ox_half_e": 12,
+      "red_half_e": 12
+    },
+    "factors": {
+      "ox_factor": 3,
+      "red_factor": 2
+    },
+    "balancing": {
+      "h_plus_count": 8,
+      "h2o_count": 8
+    }
+  },
+  {
+    "id": 29,
+    "difficulty": "sehr anspruchsvoll",
+    "agents": {
+      "ox_mittel": "MnO4-",
+      "red_mittel": "HCOOH"
+    },
+    "equation": {
+      "reactants": [
+        {
+          "formula_text": "MnO",
+          "charge": "-4",
+          "atoms": [
+            { "symbol": "Mn", "count": 1, "oz": "-2" },
+            { "symbol": "O", "count": 1, "oz": "-2" }
+          ]
+        },
+        {
+          "formula_text": "HCOOH",
+          "charge": "0",
+          "atoms": [
+            { "symbol": "C", "count": 1, "oz": "+2" },
+            { "symbol": "H", "count": 2, "oz": "+1" },
+            { "symbol": "O", "count": 2, "oz": "-2" }
+          ]
+        }
+      ],
+      "products": [
+        {
+          "formula_text": "Mn",
+          "charge": "+2",
+          "atoms": [
+            { "symbol": "Mn", "count": 1, "oz": "+2" }
+          ]
+        },
+        {
+          "formula_text": "CO2",
+          "charge": "0",
+          "atoms": [
+            { "symbol": "C", "count": 1, "oz": "+4" },
+            { "symbol": "O", "count": 2, "oz": "-2" }
+          ]
+        }
+      ]
+    },
+    "electrons": {
+      "ox_half_e": 10,
+      "red_half_e": 10
+    },
+    "factors": {
+      "ox_factor": 5,
+      "red_factor": 2
+    },
+    "balancing": {
+      "h_plus_count": 6,
+      "h2o_count": 8
+    }
+  }
+]
