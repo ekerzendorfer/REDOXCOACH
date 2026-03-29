@@ -158,12 +158,13 @@
             const base_e_red = Math.round(eq.electrons.red_half_e / eq.factors.red_factor);
             const base_e_ox = Math.round(eq.electrons.ox_half_e / eq.factors.ox_factor);
 
-            // --- BUGFIX: Multiplikation der Faktoren mit den Hilfskoeffizienten ---
+            // Dynamische Koeffizienten für Phase 5 (inklusive Multiplikation mit Hilfskoeffizient)
             const c_r1 = eq.factors.red_factor * aux1.r;
             const c_r2 = eq.factors.ox_factor * aux2.r;
             const c_p1 = eq.factors.red_factor * aux1.p;
             const c_p2 = eq.factors.ox_factor * aux2.p;
 
+            // Dynamische Berechnung für H+ und H2O
             function countO(mol, coeff) { let o = mol.atoms.find(a=>a.symbol==='O'); return o ? o.count * coeff : 0; }
             function countCg(mol, coeff) { return parseInt(mol.charge || 0) * coeff; }
 
