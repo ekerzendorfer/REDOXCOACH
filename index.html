@@ -161,7 +161,7 @@
 
         // 1. Lade die JSON-Datenbank beim Start der Seite
         document.addEventListener('DOMContentLoaded', () => {
-            fetch('redox_db.json')
+            fetch('./redox_db.json')
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Datenbank konnte nicht geladen werden. Läuft der Live-Server?');
