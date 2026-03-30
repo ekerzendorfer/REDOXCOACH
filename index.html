@@ -84,9 +84,9 @@
 
     <div class="lobby-card" id="lobby">
         <div class="control-group">
-            <label for="difficulty">Schwierigkeitsgrad wählen:</label>
+            <label for="difficulty">1. Schwierigkeitsgrad wählen:</label>
             <select id="difficulty">
-                <option value="all">🌟 ALLE Gleichungen (Zufall)</option>
+                <option value="all">🌟 ALLE Gleichungen (Mix)</option>
                 <option value="sehr leicht">🟢 Sehr leicht</option>
                 <option value="leicht">🟡 Leicht</option>
                 <option value="mittel">🟠 Mittel</option>
@@ -95,7 +95,15 @@
                 <option value="sehr anspruchsvoll">💀 Sehr anspruchsvoll</option>
             </select>
         </div>
-        <button class="btn-start" id="btn-start">Zufällige Gleichung laden 🚀</button>
+        
+        <div class="control-group">
+            <label for="direct-select">2. Gezielt üben (Direktauswahl):</label>
+            <select id="direct-select">
+                <option value="random">🎲 Zufällige Gleichung (aus gewähltem Level)</option>
+                </select>
+        </div>
+
+        <button class="btn-start" id="btn-start">Gleichung starten 🚀</button>
         <button class="btn-editor" onclick="window.location.href='editor.html'">✏️ Eigene Gleichung eingeben (Editor)</button>
     </div>
 
@@ -106,26 +114,65 @@
     <script>
         let redoxDB = [];
 
+        // Funktion zum Befüllen des Direkt-Auswahl-Dropdowns
+        function updateDirectSelect() {
+            const diff = document.getElementById('difficulty').value;
+            const directSelect = document.getElementById('direct-select');
+            
+            // Filtern
+            let filtered = diff === 'all' ? redoxDB : redoxDB.filter(eq => eq.difficulty === diff);
+            
+            // Zurücksetzen
+            directSelect.innerHTML = '<option value="random">🎲 Zufällige Gleichung (aus gewähltem Level)</option>';
+            
+            // Neu befüllen
+            filtered.forEach(eq => {
+                const opt = document.createElement('option');
+                opt.value = eq.id;
+                opt.textContent = `Nr. ${eq.id}: ${eq.agents.ox_mittel} + ${eq.agents.red_mittel} ...`;
+                directSelect.appendChild(opt);
+            });
+        }
+
+        // Wenn der Schwierigkeitsgrad geändert wird, aktualisiere die Direktauswahl
+        document.getElementById('difficulty').addEventListener('change', updateDirectSelect);
+
+        // 1. Datenbank laden
         document.addEventListener('DOMContentLoaded', () => {
             fetch('./redox_db.json')
                 .then(response => {
                     if(!response.ok) throw new Error("HTTP " + response.status);
                     return response.json();
                 })
-                .then(data => { redoxDB = data; })
+                .then(data => { 
+                    redoxDB = data; 
+                    updateDirectSelect(); // Dropdown initial befüllen
+                })
                 .catch(err => alert("Datenbank nicht gefunden. Läuft die Seite auf GitHub Pages?"));
         });
 
+        // 2. Start-Button Logik
         document.getElementById('btn-start').addEventListener('click', () => {
             if(redoxDB.length === 0) { alert("Datenbank lädt noch..."); return; }
-            const diff = document.getElementById('difficulty').value;
-            let filtered = diff === 'all' ? redoxDB : redoxDB.filter(eq => eq.difficulty === diff);
-            if(filtered.length === 0) { alert("Keine Gleichung für dieses Level gefunden."); return; }
             
-            const randomEq = filtered[Math.floor(Math.random() * filtered.length)];
-            generateBoard(randomEq);
+            const selectedId = document.getElementById('direct-select').value;
+            
+            let chosenEq;
+            if (selectedId !== "random") {
+                // Direktauswahl
+                chosenEq = redoxDB.find(eq => eq.id === parseInt(selectedId));
+            } else {
+                // Zufallsauswahl aus Level
+                const diff = document.getElementById('difficulty').value;
+                let filtered = diff === 'all' ? redoxDB : redoxDB.filter(eq => eq.difficulty === diff);
+                if(filtered.length === 0) { alert("Keine Gleichung für dieses Level gefunden."); return; }
+                chosenEq = filtered[Math.floor(Math.random() * filtered.length)];
+            }
+            
+            generateBoard(chosenEq);
         });
 
+        // 3. Der HTML-Generator!
         function generateBoard(eq) {
             const r1 = eq.equation.reactants[0];
             const r2 = eq.equation.reactants[1];
@@ -158,13 +205,11 @@
             const base_e_red = Math.round(eq.electrons.red_half_e / eq.factors.red_factor);
             const base_e_ox = Math.round(eq.electrons.ox_half_e / eq.factors.ox_factor);
 
-            // Dynamische Koeffizienten für Phase 5 (inklusive Multiplikation mit Hilfskoeffizient)
             const c_r1 = eq.factors.red_factor * aux1.r;
             const c_r2 = eq.factors.ox_factor * aux2.r;
             const c_p1 = eq.factors.red_factor * aux1.p;
             const c_p2 = eq.factors.ox_factor * aux2.p;
 
-            // Dynamische Berechnung für H+ und H2O
             function countO(mol, coeff) { let o = mol.atoms.find(a=>a.symbol==='O'); return o ? o.count * coeff : 0; }
             function countCg(mol, coeff) { return parseInt(mol.charge || 0) * coeff; }
 
