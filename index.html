@@ -29,15 +29,45 @@
         .instruction { color: #627d98; margin-bottom: 40px; font-size: 1.1em; transition: opacity 0.3s; min-height: 50px; }
         hr { border: 0; height: 1px; background-color: #e2e8f0; margin: 40px 0; }
 
-        .equation-row { display: flex; align-items: flex-end; justify-content: center; gap: 6px; flex-wrap: wrap; }
+        .equation-wrapper { display: flex; flex-direction: column; align-items: center; gap: 30px; }
+        
+        /* Die Hauptgleichung (oben) */
+        .main-equation-row { display: flex; align-items: flex-end; justify-content: center; gap: 15px; flex-wrap: wrap; margin-bottom: 20px; }
+        
+        /* Container für die beiden Halbreaktionen */
+        .half-reactions-container { display: flex; flex-direction: column; gap: 30px; width: 100%; max-width: 900px; }
+        
+        /* Eine einzelne Halbreaktion (Oxidation oder Reduktion) */
+        .half-reaction-row { 
+            display: flex; align-items: center; justify-content: space-between; 
+            padding: 20px; border-radius: 12px; background-color: #f8fafc; border: 1px solid #e2e8f0;
+            opacity: 0; transform: translateY(-20px); transition: all 0.8s ease; pointer-events: none;
+        }
+        .show-phase2 .half-reaction-row { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+        /* Der durchbrochene Pfeil in der Mitte */
+        .arrow-container { display: flex; align-items: center; gap: 10px; flex-grow: 1; justify-content: center; position: relative; }
+        .arrow-line { height: 2px; background-color: #94a3b8; flex-grow: 1; min-width: 30px; }
+        .arrow-head { width: 0; height: 0; border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-left: 10px solid #94a3b8; }
+        
+        /* Die Elektronen-Box im Pfeil */
+        .e-container { 
+            display: flex; align-items: center; gap: 4px; font-weight: bold; color: #d97706; font-size: 16px; 
+            background: white; padding: 5px 10px; border-radius: 8px; border: 2px solid #fcd34d; z-index: 10;
+            opacity: 0; pointer-events: none; transform: scale(0.8); transition: all 0.5s ease;
+        }
+        .show-phase3 .e-container:not(.hidden-placeholder) { opacity: 1; pointer-events: auto; transform: scale(1); }
+        .e-input { width: 35px; height: 28px; text-align: center; font-size: 18px; font-weight: bold; border: none; outline: none; color: #b45309; background-color: transparent; }
+        .e-input:focus { border-bottom: 2px solid #b45309; }
+
         .term-col { display: flex; flex-direction: column; align-items: center; gap: 12px; }
-        .molecule { display: flex; gap: 2px; }
+        .molecule { display: flex; gap: 2px; align-items: flex-end; }
         .atom-group { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
         .symbol, .operator, .coefficient { font-family: "Times New Roman", Times, serif; font-size: 32px; line-height: 1; display: inline-flex; align-items: baseline; }
-        .operator { margin: 0 5px; font-family: sans-serif; font-weight: bold; color: #334e68; }
+        .operator { margin: 0 10px; font-family: sans-serif; font-weight: bold; color: #334e68; }
         .coefficient { margin-right: 5px; font-weight: bold; color: #3b82f6; } 
         .symbol sub, .symbol sup { font-size: 0.6em; line-height: 0; position: relative; vertical-align: baseline; }
-        .symbol sub { bottom: -0.25em; } .symbol sup { top: -0.5em; }     
+        .symbol sub { bottom: -0.25em; } .symbol sup { top: -0.5em; }      
 
         /* --- EINGABEFELDER & FARBEN --- */
         .oz-input { width: 36px; height: 28px; text-align: center; font-size: 18px; font-weight: bold; border: 2px solid #cbd5e1; border-radius: 6px; margin-bottom: 8px; outline: none; transition: all 0.3s ease; color: #334e68; }
@@ -47,15 +77,10 @@
         .oz-input.correct, .e-input.correct, .m-input.correct, .role-select.correct, .coef-input.correct, .charge-input.correct { border-color: #10b981 !important; background-color: #d1fae5 !important; color: #047857 !important; pointer-events: none; }
         .oz-input.incorrect, .e-input.incorrect, .m-input.incorrect, .role-select.incorrect, .coef-input.incorrect, .charge-input.incorrect { border-color: #ef4444 !important; background-color: #fee2e2 !important; color: #b91c1c !important; }
         .hidden-placeholder { visibility: hidden; pointer-events: none; }
-        .oz-input:focus, .role-select:focus, .e-input:focus, .m-input:focus, .coef-input:focus, .charge-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        .oz-input:focus, .role-select:focus, .m-input:focus, .coef-input:focus, .charge-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
 
-        /* --- PHASEN SICHTBARKEIT --- */
-        .role-select { padding: 4px; font-size: 12px; font-weight: 600; border: 2px solid #cbd5e1; border-radius: 6px; background-color: white; color: #334e68; cursor: pointer; outline: none; width: 120px; opacity: 0; pointer-events: none; transform: translateY(-10px); transition: all 0.5s ease; }
-        .show-phase2 .role-select:not(.hidden-placeholder) { opacity: 1; pointer-events: auto; transform: translateY(0); }
-
-        .e-container { display: flex; align-items: center; gap: 4px; font-weight: bold; color: #d97706; font-size: 16px; opacity: 0; pointer-events: none; transform: translateY(-10px); transition: all 0.5s ease; }
-        .e-input { width: 30px; height: 24px; text-align: center; font-size: 16px; font-weight: bold; border: 2px solid #fcd34d; border-radius: 6px; outline: none; color: #b45309; background-color: #fffbeb; }
-        .show-phase3 .e-container:not(.hidden-placeholder) { opacity: 1; pointer-events: auto; transform: translateY(0); }
+        /* Rollen-Auswahl in der Hauptgleichung */
+        .role-select { padding: 4px; font-size: 12px; font-weight: 600; border: 2px solid #cbd5e1; border-radius: 6px; background-color: white; color: #334e68; cursor: pointer; outline: none; width: 120px; transition: all 0.3s ease; }
 
         .phase4-container, .phase6-container { opacity: 0; pointer-events: none; max-height: 0; overflow: hidden; transition: all 0.8s ease; }
         .show-phase4 .phase4-container { opacity: 1; pointer-events: auto; max-height: 500px; }
@@ -109,23 +134,17 @@
 
     <div id="equation-workspace"></div>
 
-    <footer>Erstellt von Erich Kerzendorfer mit Hilfe von Gemini 3</footer>
+    <footer>Erstellt von Erich Kerzendorfer mit Hilfe von Gemini 3 Pro</footer>
 
     <script>
         let redoxDB = [];
 
-        // Funktion zum Befüllen des Direkt-Auswahl-Dropdowns
         function updateDirectSelect() {
             const diff = document.getElementById('difficulty').value;
             const directSelect = document.getElementById('direct-select');
-            
-            // Filtern
             let filtered = diff === 'all' ? redoxDB : redoxDB.filter(eq => eq.difficulty === diff);
             
-            // Zurücksetzen
             directSelect.innerHTML = '<option value="random">🎲 Zufällige Gleichung (aus gewähltem Level)</option>';
-            
-            // Neu befüllen
             filtered.forEach(eq => {
                 const opt = document.createElement('option');
                 opt.value = eq.id;
@@ -134,10 +153,8 @@
             });
         }
 
-        // Wenn der Schwierigkeitsgrad geändert wird, aktualisiere die Direktauswahl
         document.getElementById('difficulty').addEventListener('change', updateDirectSelect);
 
-        // 1. Datenbank laden
         document.addEventListener('DOMContentLoaded', () => {
             fetch('./redox_db.json')
                 .then(response => {
@@ -146,23 +163,20 @@
                 })
                 .then(data => { 
                     redoxDB = data; 
-                    updateDirectSelect(); // Dropdown initial befüllen
+                    updateDirectSelect(); 
                 })
                 .catch(err => alert("Datenbank nicht gefunden. Läuft die Seite auf GitHub Pages?"));
         });
 
-        // 2. Start-Button Logik
         document.getElementById('btn-start').addEventListener('click', () => {
             if(redoxDB.length === 0) { alert("Datenbank lädt noch..."); return; }
             
             const selectedId = document.getElementById('direct-select').value;
-            
             let chosenEq;
+            
             if (selectedId !== "random") {
-                // Direktauswahl
                 chosenEq = redoxDB.find(eq => eq.id === parseInt(selectedId));
             } else {
-                // Zufallsauswahl aus Level
                 const diff = document.getElementById('difficulty').value;
                 let filtered = diff === 'all' ? redoxDB : redoxDB.filter(eq => eq.difficulty === diff);
                 if(filtered.length === 0) { alert("Keine Gleichung für dieses Level gefunden."); return; }
@@ -172,7 +186,6 @@
             generateBoard(chosenEq);
         });
 
-        // 3. Der HTML-Generator!
         function generateBoard(eq) {
             const r1 = eq.equation.reactants[0];
             const r2 = eq.equation.reactants[1];
@@ -238,8 +251,10 @@
                 return c > 0 ? "+" + c : c.toString();
             }
 
-            function buildMolecule(mol, auxCoeff, finalCoeff) {
-                let html = '<div class="molecule">';
+            // Basis-Generator für die Hauptgleichung (oben)
+            function buildMainMolecule(mol, auxCoeff, finalCoeff, correctRole, optionsHTML) {
+                let html = `<div class="term-col">`;
+                html += `<div class="molecule">`;
                 
                 html += `<div class="atom-group phase5-element">
                             <input type="text" class="oz-input hidden-placeholder">
@@ -262,65 +277,103 @@
                         <span class="symbol">${atom.symbol}${subStr}${chargeTag}</span>
                     </div>`;
                 });
-                html += '</div>';
+                html += `</div>`; // Close molecule
+                
+                // Dropdown für Rolle
+                html += `<select class="role-select" data-correct="${correctRole}">
+                            <option value="">-- Rolle --</option>
+                            ${optionsHTML}
+                         </select>`;
+                
+                html += `</div>`; // Close term-col
+                return html;
+            }
+
+            // Abgespeckter Generator für die Darstellung in den Halbreaktionen (ohne OZ Inputs)
+            function buildHalfReactionMolecule(mol, auxCoeff) {
+                let html = `<div class="molecule">`;
+                if(auxCoeff > 1) {
+                    html += `<div class="atom-group"><span class="coefficient">${auxCoeff}</span></div>`;
+                }
+                let supStr = formatCharge(mol.charge);
+                mol.atoms.forEach((atom, idx) => {
+                    let isLast = idx === mol.atoms.length - 1;
+                    let subStr = atom.count > 1 ? `<sub>${atom.count}</sub>` : '';
+                    let chargeTag = (isLast && supStr) ? `<sup>${supStr}</sup>` : '';
+                    html += `<div class="atom-group"><span class="symbol" style="font-size:28px;">${atom.symbol}${subStr}${chargeTag}</span></div>`;
+                });
+                html += `</div>`;
                 return html;
             }
 
             function buildHPlus(count) {
                 return `
-                <div class="term-col phase5-element"><div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="operator">+</span></div><select class="role-select hidden-placeholder"></select><div class="e-container hidden-placeholder"><input type="text" class="e-input"></div></div>
+                <div class="term-col phase5-element"><div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="operator">+</span></div><select class="role-select hidden-placeholder"></select></div>
                 <div class="term-col phase5-element">
                     <div class="molecule">
                         <div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><input type="text" class="coef-input" data-correct="${count}" maxlength="2"></div>
                         <div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="symbol">H<sup>+</sup></span></div>
                     </div>
-                    <select class="role-select hidden-placeholder"></select><div class="e-container hidden-placeholder"><input type="text" class="e-input"></div>
+                    <select class="role-select hidden-placeholder"></select>
                 </div>`;
             }
 
             function buildH2O(count) {
                 return `
-                <div class="term-col phase5-element"><div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="operator">+</span></div><select class="role-select hidden-placeholder"></select><div class="e-container hidden-placeholder"><input type="text" class="e-input"></div></div>
+                <div class="term-col phase5-element"><div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="operator">+</span></div><select class="role-select hidden-placeholder"></select></div>
                 <div class="term-col phase5-element">
                     <div class="molecule">
                         <div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><input type="text" class="coef-input" data-correct="${count}" maxlength="2"></div>
                         <div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="symbol">H<sub>2</sub>O</span></div>
                     </div>
-                    <select class="role-select hidden-placeholder"></select><div class="e-container hidden-placeholder"><input type="text" class="e-input"></div>
+                    <select class="role-select hidden-placeholder"></select>
                 </div>`;
             }
 
+            // Reaktanten HTML (Obere Hauptzeile)
             let reactantsHTML = `
-                <div class="term-col">
-                    ${buildMolecule(r1, aux1.r, c_r1)}
-                    <select class="role-select" data-correct="ox1"><option value="">-- Rolle wählen --</option><option value="ox1">Ox1 (nimmt e⁻)</option><option value="red2">Red2 (gibt e⁻)</option></select>
-                    <div class="e-container"><input type="text" class="e-input" data-correct="${base_e_red}" maxlength="2"> e⁻</div>
-                </div>
-                <div class="term-col"><div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="operator">+</span></div><select class="role-select hidden-placeholder"></select><div class="e-container hidden-placeholder"><input type="text" class="e-input"></div></div>
-                <div class="term-col">
-                    ${buildMolecule(r2, aux2.r, c_r2)}
-                    <select class="role-select" data-correct="red2"><option value="">-- Rolle wählen --</option><option value="ox1">Ox1 (nimmt e⁻)</option><option value="red2">Red2 (gibt e⁻)</option></select>
-                    <div class="e-container"><input type="text" class="e-input" data-correct="${base_e_ox}" maxlength="2"> e⁻</div>
-                </div>`;
-            
+                ${buildMainMolecule(r1, aux1.r, c_r1, "ox1", '<option value="ox1">Ox 1</option><option value="red2">Red 2</option>')}
+                <div class="term-col"><div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="operator">+</span></div><select class="role-select hidden-placeholder"></select></div>
+                ${buildMainMolecule(r2, aux2.r, c_r2, "red2", '<option value="ox1">Ox 1</option><option value="red2">Red 2</option>')}
+            `;
             if(hplus_side === 'left') reactantsHTML += buildHPlus(hplus_count);
             if(h2o_side === 'left') reactantsHTML += buildH2O(h2o_count);
 
+            // Produkte HTML (Obere Hauptzeile)
             let productsHTML = `
-                <div class="term-col">
-                    ${buildMolecule(p1, aux1.p, c_p1)}
-                    <select class="role-select" data-correct="red1"><option value="">-- Rolle wählen --</option><option value="red1">Red1 (reduziert)</option><option value="ox2">Ox2 (oxidiert)</option></select>
-                    <div class="e-container"><input type="text" class="e-input" data-correct="${base_e_red}" maxlength="2"> e⁻</div>
-                </div>
-                <div class="term-col"><div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="operator">+</span></div><select class="role-select hidden-placeholder"></select><div class="e-container hidden-placeholder"><input type="text" class="e-input"></div></div>
-                <div class="term-col">
-                    ${buildMolecule(p2, aux2.p, c_p2)}
-                    <select class="role-select" data-correct="ox2"><option value="">-- Rolle wählen --</option><option value="red1">Red1 (reduziert)</option><option value="ox2">Ox2 (oxidiert)</option></select>
-                    <div class="e-container"><input type="text" class="e-input" data-correct="${base_e_ox}" maxlength="2"> e⁻</div>
-                </div>`;
-            
+                ${buildMainMolecule(p1, aux1.p, c_p1, "red1", '<option value="red1">Red 1</option><option value="ox2">Ox 2</option>')}
+                <div class="term-col"><div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="operator">+</span></div><select class="role-select hidden-placeholder"></select></div>
+                ${buildMainMolecule(p2, aux2.p, c_p2, "ox2", '<option value="red1">Red 1</option><option value="ox2">Ox 2</option>')}
+            `;
             if(hplus_side === 'right') productsHTML += buildHPlus(hplus_count);
             if(h2o_side === 'right') productsHTML += buildH2O(h2o_count);
+
+            // Halbreaktionen HTML (Phase 3)
+            let halfReactionsHTML = `
+                <div class="half-reactions-container">
+                    <div class="half-reaction-row">
+                        ${buildHalfReactionMolecule(r1, aux1.r)}
+                        <div class="arrow-container">
+                            <div class="arrow-line"></div>
+                            <div class="e-container"><input type="text" class="e-input" data-correct="${base_e_red}" maxlength="2"> e⁻</div>
+                            <div class="arrow-line"></div>
+                            <div class="arrow-head"></div>
+                        </div>
+                        ${buildHalfReactionMolecule(p1, aux1.p)}
+                    </div>
+                    
+                    <div class="half-reaction-row">
+                        ${buildHalfReactionMolecule(r2, aux2.r)}
+                        <div class="arrow-container">
+                            <div class="arrow-line"></div>
+                            <div class="e-container"><input type="text" class="e-input" data-correct="${base_e_ox}" maxlength="2"> e⁻</div>
+                            <div class="arrow-line"></div>
+                            <div class="arrow-head"></div>
+                        </div>
+                        ${buildHalfReactionMolecule(p2, aux2.p)}
+                    </div>
+                </div>
+            `;
 
             const finalChargeLeft = formatTotalCharge(leftCg + (hplus_side === 'left' ? hplus_count : 0));
             const finalChargeRight = formatTotalCharge(rightCg + (hplus_side === 'right' ? hplus_count : 0));
@@ -330,22 +383,26 @@
                 <h2 id="main-title">Phase 1: Oxidationszahlen</h2>
                 <p class="instruction" id="instruction-text">Gleichung Nr. ${eq.id} (${eq.difficulty})<br>Bestimme die Oxidationszahlen (Format: +6, -2, 0).</p>
 
-                <div class="equation-row">
-                    ${reactantsHTML}
-                    <div class="term-col"><div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="operator">&rarr;</span></div><select class="role-select hidden-placeholder"></select><div class="e-container hidden-placeholder"><input type="text" class="e-input"></div></div>
-                    ${productsHTML}
+                <div class="equation-wrapper">
+                    <div class="main-equation-row">
+                        ${reactantsHTML}
+                        <div class="term-col"><div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="operator" style="margin:0 20px;">&rarr;</span></div><select class="role-select hidden-placeholder"></select></div>
+                        ${productsHTML}
+                    </div>
+
+                    ${halfReactionsHTML}
                 </div>
 
                 <div class="phase4-container">
                     <hr>
-                    <h2 style="font-size: 24px;">Phase 4: Elektronenbilanz</h2>
+                    <h2 style="font-size: 24px;">Phase 4: Elektronenbilanz (Multiplikatoren)</h2>
                     <div class="balance-board">
                         <div class="balance-row">
-                            <div class="balance-label"><span class="badge red">Reduktion</span>(Ox1 &rarr; Red1) nimmt <span class="e-count" style="margin-left:5px;">${base_e_red} e⁻</span> auf</div>
+                            <div class="balance-label"><span class="badge red">Reduktion</span> Die obere Teilreaktion nimmt <span class="e-count" style="margin-left:5px;">${base_e_red} e⁻</span> auf</div>
                             <div class="multiplier-group">&times; <input type="text" class="m-input" data-correct="${eq.factors.red_factor}" maxlength="2"></div>
                         </div>
                         <div class="balance-row">
-                            <div class="balance-label"><span class="badge ox">Oxidation</span>(Red2 &rarr; Ox2) gibt <span class="e-count" style="margin-left:5px;">${base_e_ox} e⁻</span> ab</div>
+                            <div class="balance-label"><span class="badge ox">Oxidation</span> Die untere Teilreaktion gibt <span class="e-count" style="margin-left:5px;">${base_e_ox} e⁻</span> ab</div>
                             <div class="multiplier-group">&times; <input type="text" class="m-input" data-correct="${eq.factors.ox_factor}" maxlength="2"></div>
                         </div>
                     </div>
@@ -406,8 +463,17 @@
                     inst.style.opacity = 0;
                     setTimeout(() => {
                         title.innerText = "Phase 2: Redoxpaare";
-                        inst.innerHTML = "Ordne die Rollen (Ox1/Red1 und Red2/Ox2) zu.";
-                        inst.style.opacity = 1; board.classList.add('show-phase2');
+                        inst.innerHTML = "Wähle in den Dropdown-Menüs aus, wer hier wem entspricht (Ox1 wird zu Red1 etc.).";
+                        inst.style.opacity = 1; 
+                        
+                        // Dropdowns einblenden (wurden in Phase 1 ausgeblendet durch initiales CSS)
+                        document.querySelectorAll('.role-select').forEach(sel => {
+                            if(!sel.classList.contains('hidden-placeholder')) {
+                                sel.style.opacity = 1;
+                                sel.style.pointerEvents = "auto";
+                            }
+                        });
+                        
                     }, 300);
                 }
             });
@@ -416,9 +482,11 @@
                 if(checkAll('.role-select[data-correct]')) {
                     inst.style.opacity = 0;
                     setTimeout(() => {
-                        title.innerText = "Phase 3: Elektronenübergang";
-                        inst.innerHTML = "Wie viele Elektronen (e⁻) werden insgesamt pro Teilchen aufgenommen bzw. abgegeben?";
-                        inst.style.opacity = 1; board.classList.add('show-phase3');
+                        title.innerText = "Phase 3: Die Halbreaktionen";
+                        inst.innerHTML = "Hier siehst du die beiden isolierten Teilprozesse. Wie viele Elektronen (e⁻) fließen jeweils pro Formelumsatz?";
+                        inst.style.opacity = 1; 
+                        board.classList.add('show-phase2'); // Zeigt die Halbreaktionen-Boxen an
+                        board.classList.add('show-phase3'); // Zeigt die e-Input Kästchen an
                     }, 300);
                 }
             });
@@ -429,7 +497,8 @@
                     setTimeout(() => {
                         title.innerText = "Phase 4: Die Multiplikatoren";
                         inst.innerHTML = "Ermittle das kleinste gemeinsame Vielfache (kgV) der Elektronen.";
-                        inst.style.opacity = 1; board.classList.add('show-phase4');
+                        inst.style.opacity = 1; 
+                        board.classList.add('show-phase4');
                     }, 300);
                 }
             });
@@ -439,8 +508,9 @@
                     inst.style.opacity = 0;
                     setTimeout(() => {
                         title.innerHTML = "Phase 5: Stoffbilanz (H<sup>+</sup> und H<sub>2</sub>O)";
-                        inst.innerHTML = "Gleiche die Atome und Ladungen aus.<br>Nutze die Boxen, um die finalen Koeffizienten festzulegen.";
-                        inst.style.opacity = 1; board.classList.add('show-phase5');
+                        inst.innerHTML = "Gleiche die Atome und Ladungen in der Hauptgleichung oben aus.<br>Nutze die Boxen, um die finalen Koeffizienten festzulegen.";
+                        inst.style.opacity = 1; 
+                        board.classList.add('show-phase5'); // Blendet die Koeffizienten in der Hauptgleichung ein
                     }, 300);
                 }
             });
@@ -450,7 +520,8 @@
                     inst.style.opacity = 0;
                     setTimeout(() => {
                         title.innerText = "Phase 6: Die finale Kontrolle";
-                        inst.style.opacity = 1; board.classList.add('show-phase6');
+                        inst.style.opacity = 1; 
+                        board.classList.add('show-phase6');
                     }, 300);
                 }
             });
