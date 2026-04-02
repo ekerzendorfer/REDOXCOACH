@@ -35,15 +35,21 @@
         .main-equation-row { display: flex; align-items: flex-end; justify-content: center; gap: 15px; flex-wrap: wrap; margin-bottom: 20px; }
         
         /* Container für die beiden Halbreaktionen */
-        .half-reactions-container { display: flex; flex-direction: column; gap: 30px; width: 100%; max-width: 900px; }
+        .half-reactions-container { display: flex; flex-direction: column; gap: 30px; width: 100%; max-width: 950px; }
         
         /* Eine einzelne Halbreaktion (Oxidation oder Reduktion) */
         .half-reaction-row { 
-            display: flex; align-items: center; justify-content: space-between; 
+            display: flex; align-items: center; justify-content: space-between; gap: 15px;
             padding: 20px; border-radius: 12px; background-color: #f8fafc; border: 1px solid #e2e8f0;
             opacity: 0; transform: translateY(-20px); transition: all 0.8s ease; pointer-events: none;
         }
         .show-phase2 .half-reaction-row { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+        /* Dropdown für den Halbreaktions-Typ (Ox/Red) */
+        .hr-select { padding: 8px; font-size: 14px; font-weight: bold; border: 2px solid #cbd5e1; border-radius: 8px; background-color: white; color: #334e68; cursor: pointer; outline: none; transition: all 0.3s ease; }
+        .hr-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        .hr-select.correct { border-color: #10b981 !important; background-color: #d1fae5 !important; color: #047857 !important; pointer-events: none; }
+        .hr-select.incorrect { border-color: #ef4444 !important; background-color: #fee2e2 !important; color: #b91c1c !important; }
 
         /* Der durchbrochene Pfeil in der Mitte */
         .arrow-container { display: flex; align-items: center; gap: 10px; flex-grow: 1; justify-content: center; position: relative; }
@@ -74,7 +80,14 @@
         .coef-input { width: 46px; height: 34px; text-align: center; font-size: 22px; font-weight: bold; border: 2px solid #94a3b8; border-radius: 6px; margin-right: 4px; outline: none; transition: all 0.3s ease; color: #0f172a; background-color: #f8fafc; font-family: "Times New Roman", Times, serif; }
         .charge-input { width: 46px; height: 34px; text-align: center; font-size: 20px; font-weight: bold; border: 2px solid #94a3b8; border-radius: 6px; outline: none; transition: all 0.3s ease; color: #0f172a; background-color: #f8fafc; }
 
-        .oz-input.correct, .e-input.correct, .m-input.correct, .role-select.correct, .coef-input.correct, .charge-input.correct { border-color: #10b981 !important; background-color: #d1fae5 !important; color: #047857 !important; pointer-events: none; }
+        /* FARBLICHE TRENNUNG DER REDOXPAARE */
+        .oz-input.correct, .e-input.correct, .m-input.correct, .coef-input.correct, .charge-input.correct { border-color: #10b981 !important; background-color: #d1fae5 !important; color: #047857 !important; pointer-events: none; }
+        
+        /* Paar 1: Ox1 / Red1 (Smaragdgrün) */
+        .role-select.correct-pair1 { border-color: #10b981 !important; background-color: #d1fae5 !important; color: #047857 !important; pointer-events: none; }
+        /* Paar 2: Red2 / Ox2 (Blaugrün / Teal) */
+        .role-select.correct-pair2 { border-color: #14b8a6 !important; background-color: #ccfbf1 !important; color: #0f766e !important; pointer-events: none; }
+        
         .oz-input.incorrect, .e-input.incorrect, .m-input.incorrect, .role-select.incorrect, .coef-input.incorrect, .charge-input.incorrect { border-color: #ef4444 !important; background-color: #fee2e2 !important; color: #b91c1c !important; }
         .hidden-placeholder { visibility: hidden; pointer-events: none; }
         .oz-input:focus, .role-select:focus, .m-input:focus, .coef-input:focus, .charge-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
@@ -125,7 +138,7 @@
             <label for="direct-select">2. Gezielt üben (Direktauswahl):</label>
             <select id="direct-select">
                 <option value="random">🎲 Zufällige Gleichung (aus gewähltem Level)</option>
-                </select>
+            </select>
         </div>
 
         <button class="btn-start" id="btn-start">Gleichung starten 🚀</button>
@@ -279,17 +292,15 @@
                 });
                 html += `</div>`; // Close molecule
                 
-                // Dropdown für Rolle
                 html += `<select class="role-select" data-correct="${correctRole}">
                             <option value="">-- Rolle --</option>
                             ${optionsHTML}
                          </select>`;
                 
-                html += `</div>`; // Close term-col
+                html += `</div>`; 
                 return html;
             }
 
-            // Abgespeckter Generator für die Darstellung in den Halbreaktionen (ohne OZ Inputs)
             function buildHalfReactionMolecule(mol, auxCoeff) {
                 let html = `<div class="molecule">`;
                 if(auxCoeff > 1) {
@@ -330,7 +341,6 @@
                 </div>`;
             }
 
-            // Reaktanten HTML (Obere Hauptzeile)
             let reactantsHTML = `
                 ${buildMainMolecule(r1, aux1.r, c_r1, "ox1", '<option value="ox1">Ox 1</option><option value="red2">Red 2</option>')}
                 <div class="term-col"><div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="operator">+</span></div><select class="role-select hidden-placeholder"></select></div>
@@ -339,7 +349,6 @@
             if(hplus_side === 'left') reactantsHTML += buildHPlus(hplus_count);
             if(h2o_side === 'left') reactantsHTML += buildH2O(h2o_count);
 
-            // Produkte HTML (Obere Hauptzeile)
             let productsHTML = `
                 ${buildMainMolecule(p1, aux1.p, c_p1, "red1", '<option value="red1">Red 1</option><option value="ox2">Ox 2</option>')}
                 <div class="term-col"><div class="atom-group"><input type="text" class="oz-input hidden-placeholder"><span class="operator">+</span></div><select class="role-select hidden-placeholder"></select></div>
@@ -352,6 +361,7 @@
             let halfReactionsHTML = `
                 <div class="half-reactions-container">
                     <div class="half-reaction-row">
+                        <select class="hr-select" data-correct="red"><option value="">-- Typ wählen --</option><option value="ox">Oxidation (Abgabe e⁻)</option><option value="red">Reduktion (Aufnahme e⁻)</option></select>
                         ${buildHalfReactionMolecule(r1, aux1.r)}
                         <div class="arrow-container">
                             <div class="arrow-line"></div>
@@ -363,6 +373,7 @@
                     </div>
                     
                     <div class="half-reaction-row">
+                        <select class="hr-select" data-correct="ox"><option value="">-- Typ wählen --</option><option value="ox">Oxidation (Abgabe e⁻)</option><option value="red">Reduktion (Aufnahme e⁻)</option></select>
                         ${buildHalfReactionMolecule(r2, aux2.r)}
                         <div class="arrow-container">
                             <div class="arrow-line"></div>
@@ -442,22 +453,33 @@
             const title = document.getElementById('main-title');
             const inst = document.getElementById('instruction-text');
 
+            // Behält weiterhin die Logik über die allgemeine '.correct' Klasse für checkAll
             function checkAll(selector) { return Array.from(document.querySelectorAll(selector)).every(el => el.classList.contains('correct')); }
             
             function bindInputs(selector, nextPhaseFunc) {
                 document.querySelectorAll(selector).forEach(el => {
                     el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', function() {
-                        this.classList.remove('correct', 'incorrect');
+                        this.classList.remove('correct', 'incorrect', 'correct-pair1', 'correct-pair2');
                         let val = this.value.trim();
                         if(val !== '' && val !== '+' && val !== '-') {
-                            if (val === this.dataset.correct) this.classList.add('correct');
-                            else this.classList.add('incorrect');
+                            if (val === this.dataset.correct) {
+                                // Spezielle Farblogik für die Redoxpaare in Phase 2
+                                if(this.classList.contains('role-select')) {
+                                    if (val === 'ox1' || val === 'red1') this.classList.add('correct-pair1', 'correct');
+                                    else if (val === 'red2' || val === 'ox2') this.classList.add('correct-pair2', 'correct');
+                                } else {
+                                    this.classList.add('correct');
+                                }
+                            } else {
+                                this.classList.add('incorrect');
+                            }
                             nextPhaseFunc();
                         }
                     });
                 });
             }
 
+            // Phase 1 -> 2
             bindInputs('.oz-input[data-correct]', () => {
                 if(checkAll('.oz-input[data-correct]')) {
                     inst.style.opacity = 0;
@@ -466,33 +488,33 @@
                         inst.innerHTML = "Wähle in den Dropdown-Menüs aus, wer hier wem entspricht (Ox1 wird zu Red1 etc.).";
                         inst.style.opacity = 1; 
                         
-                        // Dropdowns einblenden (wurden in Phase 1 ausgeblendet durch initiales CSS)
                         document.querySelectorAll('.role-select').forEach(sel => {
                             if(!sel.classList.contains('hidden-placeholder')) {
                                 sel.style.opacity = 1;
                                 sel.style.pointerEvents = "auto";
                             }
                         });
-                        
                     }, 300);
                 }
             });
 
+            // Phase 2 -> 3
             bindInputs('.role-select[data-correct]', () => {
                 if(checkAll('.role-select[data-correct]')) {
                     inst.style.opacity = 0;
                     setTimeout(() => {
                         title.innerText = "Phase 3: Die Halbreaktionen";
-                        inst.innerHTML = "Hier siehst du die beiden isolierten Teilprozesse. Wie viele Elektronen (e⁻) fließen jeweils pro Formelumsatz?";
+                        inst.innerHTML = "Wähle den Reaktionstyp für die beiden isolierten Teilprozesse und bestimme, wie viele Elektronen (e⁻) fließen.";
                         inst.style.opacity = 1; 
-                        board.classList.add('show-phase2'); // Zeigt die Halbreaktionen-Boxen an
-                        board.classList.add('show-phase3'); // Zeigt die e-Input Kästchen an
+                        board.classList.add('show-phase2'); // Zeigt die Halbreaktionen-Boxen (inkl. Dropdown)
+                        board.classList.add('show-phase3'); // Zeigt die e-Input Kästchen im Pfeil
                     }, 300);
                 }
             });
 
-            bindInputs('.e-input[data-correct]', () => {
-                if(checkAll('.e-input[data-correct]')) {
+            // Phase 3 -> 4 (Kombinierte Prüfung für e-input und hr-select)
+            function checkPhase3() {
+                if(checkAll('.e-input[data-correct]') && checkAll('.hr-select[data-correct]')) {
                     inst.style.opacity = 0;
                     setTimeout(() => {
                         title.innerText = "Phase 4: Die Multiplikatoren";
@@ -501,8 +523,11 @@
                         board.classList.add('show-phase4');
                     }, 300);
                 }
-            });
+            }
+            bindInputs('.e-input[data-correct]', checkPhase3);
+            bindInputs('.hr-select[data-correct]', checkPhase3);
 
+            // Phase 4 -> 5
             bindInputs('.m-input[data-correct]', () => {
                 if(checkAll('.m-input[data-correct]')) {
                     inst.style.opacity = 0;
@@ -510,11 +535,12 @@
                         title.innerHTML = "Phase 5: Stoffbilanz (H<sup>+</sup> und H<sub>2</sub>O)";
                         inst.innerHTML = "Gleiche die Atome und Ladungen in der Hauptgleichung oben aus.<br>Nutze die Boxen, um die finalen Koeffizienten festzulegen.";
                         inst.style.opacity = 1; 
-                        board.classList.add('show-phase5'); // Blendet die Koeffizienten in der Hauptgleichung ein
+                        board.classList.add('show-phase5');
                     }, 300);
                 }
             });
 
+            // Phase 5 -> 6
             bindInputs('.coef-input[data-correct]', () => {
                 if(checkAll('.coef-input[data-correct]')) {
                     inst.style.opacity = 0;
@@ -526,6 +552,7 @@
                 }
             });
 
+            // Phase 6 -> Ende
             bindInputs('.charge-input[data-correct]', () => {
                 if(checkAll('.charge-input[data-correct]')) {
                     document.getElementById('success-message').style.display = 'block';
